@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GymPro Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,sans-serif;background:#050508;color:#f0f0f0;min-height:100vh}
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);border-radius:20px;padding:8px 20px;font-size:12px;z-index:9999;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}.toast.ok{background:#0d1f0d;border:1px solid #1a4a1a;color:#7ed87e}.toast.err{background:#2a1a0a;border:1px solid #5a3a0a;color:#e0a060}
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.abox{width:100%;max-width:340px;text-align:center}
+.inp{width:100%;padding:12px 15px;border-radius:12px;border:1px solid #1e1e1e;background:#111;color:#f0f0f0;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;display:block}
+.inp:focus{border-color:#378ADD}.inp::placeholder{color:#333}
+.btn{width:100%;padding:13px;border-radius:12px;border:none;background:#185FA5;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn:disabled{background:#1a1a2a;color:#444;cursor:not-allowed}
+.err-box{background:#1a0808;border:1px solid #3a1515;border-radius:10px;padding:10px;font-size:12px;color:#e07070;margin-bottom:10px;display:none;text-align:left}
+/* LAYOUT */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #1a1a1a}
+.hdr-title{font-size:18px;font-weight:800;color:#f0f0f0}
+.hdr-sub{font-size:11px;color:#444;margin-top:2px}
+.out-btn{padding:7px 14px;border-radius:9px;border:1px solid #222;background:transparent;color:#555;font-size:12px;cursor:pointer;font-family:inherit}
+.tabs{display:flex;gap:5px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid #1a1a1a;background:transparent;color:#555;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;white-space:nowrap;transition:all .15s}
+.tab.active{background:#185FA5;border-color:#185FA5;color:#fff}
+/* CARDS */
+.card{background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px}
+.card-hdr{font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.sc{background:#0f0f0f;border-radius:12px;padding:13px;border:0.5px solid #1a1a1a;text-align:center}
+.sc-val{font-size:24px;font-weight:800;margin-bottom:2px}
+.sc-lbl{font-size:10px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:7px 10px;color:#555;font-weight:700;border-bottom:1px solid #1a1a1a;font-size:11px;text-transform:uppercase}
+.tbl td{padding:7px 10px;border-bottom:0.5px solid #111;color:#ccc;vertical-align:middle}
+.tbl tr:hover td{background:#111}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.ebtn{padding:4px 10px;border-radius:7px;border:0.5px solid #1a3050;background:#0a1525;color:#378ADD;font-size:11px;cursor:pointer;font-family:inherit}
+.dbtn{padding:4px 10px;border-radius:7px;border:0.5px solid #2a1515;background:#150a0a;color:#e05555;font-size:11px;cursor:pointer;font-family:inherit}
+.sbtn{padding:8px 16px;border-radius:9px;border:none;background:#185FA5;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+/* FORM */
+.fl{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.mi{width:100%;padding:9px 12px;border-radius:9px;border:1px solid #1e1e1e;background:#161616;color:#f0f0f0;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px}
+.mi:focus{border-color:#378ADD}.mi::placeholder{color:#333}
+textarea.mi{resize:vertical;min-height:65px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* MODAL */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.mov.show{display:flex}
+.modal{background:#0f0f12;border-radius:14px;padding:18px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.mtitle{font-size:15px;font-weight:700;color:#f0f0f0;margin-bottom:14px}
+.mfoot{display:flex;gap:8px;margin-top:12px}
+.mcbtn{flex:1;padding:10px;border-radius:9px;border:1px solid #222;background:transparent;color:#555;font-size:13px;cursor:pointer;font-family:inherit}
+.info-box{background:#0a1525;border:0.5px solid #185FA5;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#378ADD;line-height:1.6}
+.empty{text-align:center;color:#333;padding:24px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- AUTH -->
+<div id="sAuth">
+<div class="auth-wrap"><div class="abox">
+  <div style="font-size:44px;margin-bottom:10px">🔐</div>
+  <div style="font-size:22px;font-weight:800;color:#f0f0f0;margin-bottom:4px">GymPro Admin</div>
+  <div style="font-size:13px;color:#444;margin-bottom:22px">Authorized access only</div>
+  <input class="inp" id="aEmail" type="email" placeholder="Admin email"/>
+  <input class="inp" id="aPass" type="password" placeholder="Password"/>
+  <div class="err-box" id="aErr"></div>
+  <button class="btn" id="aBtn" onclick="login()">Login →</button>
+</div></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="sDash" style="display:none">
+<div class="wrap">
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">⚡ GymPro Admin</div>
+      <div class="hdr-sub" id="adminSub">Loading...</div>
+    </div>
+    <button class="out-btn" onclick="logout()">Log Out</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="t0" onclick="tab(0)">📊 Overview</button>
+    <button class="tab" id="t1" onclick="tab(1)">👥 Users</button>
+    <button class="tab" id="t2" onclick="tab(2)">🏋️ Exercises</button>
+    <button class="tab" id="t3" onclick="tab(3)">📋 Plans</button>
+    <button class="tab" id="t4" onclick="tab(4)">💬 Messages</button>
+  </div>
+  <div id="content"></div>
+</div>
+</div>
+
+<!-- EXERCISE MODAL -->
+<div class="mov" id="exMov">
+<div class="modal">
+  <div class="mtitle" id="exMT">Add Exercise Info</div>
+  <div class="info-box">Exercise name must match exactly what appears in the workout app. User taps exercise → ℹ️ popup shows this info with GIF.</div>
+  <div class="fl">Exercise Name (exact match)</div>
+  <input class="mi" id="emN" placeholder="e.g. Barbell Bench Press"/>
+  <div class="fl">Primary Muscles</div>
+  <input class="mi" id="emM" placeholder="e.g. Chest, Front Delts, Triceps"/>
+  <div class="fl">GIF URL</div>
+  <input class="mi" id="emG" placeholder="https://media.giphy.com/..."/>
+  <div style="font-size:11px;color:#378ADD;margin-bottom:8px">→ giphy.com → search exercise → right-click GIF → Copy image address</div>
+  <div class="fl">Why this exercise?</div>
+  <textarea class="mi" id="emW" placeholder="Explain the benefit and science behind it..."></textarea>
+  <div class="fl">How to perform (one step per line)</div>
+  <textarea class="mi" id="emH" placeholder="Step 1&#10;Step 2&#10;Step 3"></textarea>
+  <div class="fl">Common mistakes (one per line)</div>
+  <textarea class="mi" id="emMi" placeholder="Mistake 1&#10;Mistake 2"></textarea>
+  <div class="mfoot">
+    <button class="mcbtn" onclick="closeEx()">Cancel</button>
+    <button class="sbtn" onclick="saveEx()">Save Exercise</button>
+  </div>
+</div>
+</div>
+
+<!-- PLAN MODAL -->
+<div class="mov" id="planMov">
+<div class="modal">
+  <div class="mtitle" id="planMT">Add Plan</div>
+  <div class="fl">Plan Name</div>
+  <input class="mi" id="pmN" placeholder="e.g. My Custom Split"/>
+  <div class="frow">
+    <div><div class="fl">Icon (emoji)</div><input class="mi" id="pmI" placeholder="⚡"/></div>
+    <div><div class="fl">Goal</div>
+      <select class="mi" id="pmG" style="color:#f0f0f0">
+        <option value="muscle">Muscle Gain</option>
+        <option value="fat_loss">Fat Loss</option>
+        <option value="strength">Strength</option>
+        <option value="athletic">Athletic</option>
+        <option value="general">General</option>
+      </select>
+    </div>
+  </div>
+  <div class="frow">
+    <div><div class="fl">Days/week</div><input class="mi" id="pmD" type="number" placeholder="6"/></div>
+    <div><div class="fl">Level</div>
+      <select class="mi" id="pmL" style="color:#f0f0f0">
+        <option value="all">All Levels</option>
+        <option value="beginner">Beginner</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="advanced">Advanced</option>
+      </select>
+    </div>
+  </div>
+  <div class="fl">Description</div>
+  <textarea class="mi" id="pmDsc" placeholder="Brief description..."></textarea>
+  <div class="mfoot">
+    <button class="mcbtn" onclick="closePlan()">Cancel</button>
+    <button class="sbtn" onclick="savePlan()">Save Plan</button>
+  </div>
+</div>
+</div>
+
+<!-- MESSAGE MODAL -->
+<div class="mov" id="msgMov">
+<div class="modal">
+  <div class="mtitle">Send Message to User</div>
+  <div class="fl">To</div>
+  <input class="mi" id="msgTo" readonly style="opacity:.5;margin-bottom:10px"/>
+  <div class="fl">Message</div>
+  <textarea class="mi" id="msgTxt" placeholder="Type your message..." style="min-height:90px"></textarea>
+  <div class="mfoot">
+    <button class="mcbtn" onclick="closeMsg()">Cancel</button>
+    <button class="sbtn" onclick="sendMsg()">Send ✓</button>
+  </div>
+</div>
+</div>
+
+<script>
+const EX_INFO={
+  'barbell bench press':{gif:'https://media.giphy.com/media/3oKIPsx2VAYAgEHC12/giphy.gif',muscles:['Chest','Front Delts','Triceps'],why:'The bench press is the #1 upper body mass builder. Maximum chest loading with triceps and front delts working together. Produces the highest pectoral muscle activation of any exercise.',how:['Lie flat, feet planted firm on floor','Grip bar slightly wider than shoulder width','Unrack, hold directly over lower chest','Lower bar to nipple line with 2 second control','Drive bar back up through a slight arc','Keep scapula retracted throughout every rep'],mistakes:['Bouncing bar off chest for momentum','Flaring elbows out to 90 degrees','Lifting feet off the floor','Losing scapula retraction mid-set']},
+  'incline db press':{gif:'https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif',muscles:['Upper Chest','Front Delts','Triceps'],why:'The incline angle targets the underdeveloped upper chest (clavicular head). This creates the full shelf appearance that makes the chest look complete from all angles.',how:['Set bench to 30 to 45 degrees only','Sit with DBs on knees then kick up','Lower DBs to chest level at armpits','Keep elbows at 45 degree angle, not 90','Press up and slightly together at top','Control the negative with 2 to 3 seconds'],mistakes:['Bench angle too steep above 45 degrees','Flaring elbows out wide','Not reaching full stretch at bottom','Too much front delt dominating the movement']},
+  'back squat':{gif:'https://media.giphy.com/media/3oKIPu1CtqObDuMbfO/giphy.gif',muscles:['Quads','Glutes','Hamstrings','Core','Spinal Erectors'],why:'The back squat is the single most effective exercise for building overall lower body mass and strength. It releases more testosterone and growth hormone than any other exercise due to the sheer amount of muscle mass involved.',how:['Bar on upper traps not on the neck','Feet shoulder-width, toes slightly turned out','Big breath in, brace core before going down','Break at hips and knees at the same time','Descend until hip crease is below knee level','Drive through whole foot on the way back up'],mistakes:['Knee cave inward during movement','Heels rising off the floor','Good morning squat with hips rising first','Not reaching depth below parallel']},
+  'deadlift':{gif:'https://media.giphy.com/media/3oKIPaFqA5KFaI1mlW/giphy.gif',muscles:['Hamstrings','Glutes','Spinal Erectors','Traps','Lats','Forearms'],why:'The deadlift builds more total muscle mass than any other single exercise. It trains the entire posterior chain, core, and grip simultaneously and produces the highest anabolic hormone response of any lift.',how:['Stand with bar directly over mid-foot','Hip-width stance, grip just outside legs','Hinge at hips, keep back flat throughout','Push the floor away, do not think about pulling','Bar stays in contact with legs the whole time','Lock out by standing tall and squeezing glutes'],mistakes:['Rounding the lower back at any point','Jerking bar off the floor with momentum','Bar drifting away from body during pull','Hyperextending at lockout position']},
+  'pull-ups':{gif:'https://media.giphy.com/media/3oKIPkoTM3PNXH1IlG/giphy.gif',muscles:['Lats','Rhomboids','Rear Delts','Biceps','Core'],why:'Pull-ups are the gold standard for lat development and relative strength. Unlike machines they require full stabilization and train the core simultaneously. Best back width exercise that exists.',how:['Start with dead hang, full arm extension','Grip slightly wider than shoulder width','Pull elbows down and back simultaneously','Chin must clear the bar at the top','Lower with 2 to 3 second control','Do not kip unless specifically training power'],mistakes:['Half reps without going to full hang','Using momentum and kipping to get up','Chin not actually clearing the bar','Shrugging shoulders instead of pulling lats']},
+  'barbell row':{gif:'https://media.giphy.com/media/3oKIPdBST3dAfQQy0E/giphy.gif',muscles:['Rhomboids','Lats','Rear Delts','Biceps','Traps'],why:'The barbell row is the best exercise for back thickness. It targets all back muscles simultaneously and allows very heavy loading. Balancing bench press with rows is essential for shoulder health and good posture.',how:['Hinge at hips to 45 degree angle','Grip just wider than shoulder-width apart','Pull bar to lower chest or upper abdomen','Drive elbows back and slightly up','Lower with full control on every rep','Keep back flat throughout the entire set'],mistakes:['Standing too upright during the row','Using leg momentum to move the weight','Pulling bar to wrong body location','Excessive lower back rounding at any point']},
+  'overhead press':{gif:'https://media.giphy.com/media/3oKIPpfX1V7dlS7Bpq/giphy.gif',muscles:['Front Delts','Lateral Delts','Triceps','Upper Chest','Core'],why:'The overhead press builds three-dimensional shoulder development and is the most functional pressing movement available. It trains the core under significant load and builds proportionate upper body strength.',how:['Bar at collar bone, hands just outside shoulders','Brace core and squeeze glutes hard','Press bar straight up from rack position','Move head back slightly to let bar pass','Lock out overhead, push head through the gap','Lower with control back to starting position'],mistakes:['Excessive lower back arch during press','Bar path going too far forward','Not achieving full lockout overhead','Insufficient core bracing before pressing']},
+  'lateral raises':{gif:'https://media.giphy.com/media/xT9IgJWn3dEG3BU3Ic/giphy.gif',muscles:['Lateral Deltoid','Supraspinatus'],why:'Lateral raises are the ONLY exercise that directly isolates the lateral deltoid which is the muscle responsible for shoulder width. No amount of pressing replaces this movement for creating the wide capped shoulder look.',how:['Start with DBs hanging at sides','Slight bend in elbows, maintain throughout','Raise arms out to sides to shoulder height','Lead with elbows not hands throughout','Hold 1 second at the top of each rep','Lower with full control, 2 second negative'],mistakes:['Shrugging traps instead of raising laterally','Going too heavy and using momentum','Raising above shoulder height unnecessarily','Bending elbows too much reducing lateral work']},
+  'leg press':{gif:'https://media.giphy.com/media/3oKIPdVDDjqkm2VuAU/giphy.gif',muscles:['Quads','Glutes','Hamstrings','Calves'],why:'The leg press allows heavier loading than squats without spinal compression, making it excellent for quad volume work. It isolates the legs without the technical demands of squatting, allowing true intensity.',how:['Feet shoulder-width, middle of platform','Push weight up slightly to unlock safety','Lower until 90 degree knee angle or below','Do not allow lower back to round off pad','Press through full foot evenly throughout','Do not lock knees completely at top'],mistakes:['Too short range of motion to make it easy','Letting lower back peel off the pad','Feet too high makes it all glute dominant','Locking knees completely at extension point']},
+  'romanian deadlift':{gif:'https://media.giphy.com/media/3oKIP4FMEKlVqxNHjG/giphy.gif',muscles:['Hamstrings','Glutes','Spinal Erectors','Core'],why:'The Romanian Deadlift is the premier hamstring mass-building exercise. It trains hamstrings in the stretched position which research consistently shows produces greater muscle growth than shortened position training.',how:['Stand with bar or DBs at hip level','Push hips back, do not bend knees much','Let weight travel very close to legs','Feel hamstrings stretch to their absolute limit','Drive hips forward to return to standing','Keep back completely flat throughout'],mistakes:['Bending knees too much, becomes a squat','Rounding the lower back at any point','Not feeling the hamstring stretch at all','Bar drifting away from legs during movement']},
+  'face pulls':{gif:'https://media.giphy.com/media/3oKIPvvaugnP88DdOE/giphy.gif',muscles:['Rear Delts','External Rotators','Rhomboids','Traps'],why:'Face pulls are arguably the most important shoulder injury prevention exercise. They strengthen external rotators which are the most commonly injured muscles in gym-goers. Every pressing session should include face pulls.',how:['Set cable at head height with rope attachment','Use double rope grip on each side','Pull rope to face level with hands beside ears','Externally rotate at peak with hands behind head','Elbows stay above shoulder height throughout','Hold peak contraction for 1 full second'],mistakes:['Pulling to chin instead of face level','No external rotation occurring at the peak','Going too heavy and using body momentum','Elbows dropping below shoulder height during pull']},
+  'hip thrust':{gif:'https://media.giphy.com/media/3oKIPnbmKxTyDcMGOA/giphy.gif',muscles:['Glutes','Hamstrings','Core','Hip Flexors'],why:'Hip thrusts produce the highest glute activation of any exercise confirmed by EMG research. Bigger glutes equals better posture, less back pain, better athletic performance, and improved aesthetics.',how:['Sit with upper back against bench edge','Bar padded across hip bones for comfort','Feet flat, about shin-length distance from body','Drive through heels not through the toes','Fully extend hips at the very top, squeeze hard','Lower with complete control each repetition'],mistakes:['Not fully extending hips at the top','Driving through toes instead of heels','Bar rolling during the movement','Chin not tucked leading to back overarch']},
+  'plank':{gif:'https://media.giphy.com/media/l0HlQkInwts90VkdG/giphy.gif',muscles:['Core','Transverse Abdominis','Spinal Erectors','Glutes','Shoulder Stabilizers'],why:'The plank trains core in its most functional role as a stabilizer. Unlike crunches it trains all core muscles simultaneously and teaches intra-abdominal pressure which is the foundation of all heavy lifting.',how:['Forearms on floor, elbows directly under shoulders','Body in perfectly straight line head to heels','Squeeze glutes and abs at the same time','Breathe normally throughout the entire hold','Do not let hips sag down or rise up','Focus on squeezing hard not just surviving time'],mistakes:['Hips too high or too low at any point','Holding breath during the plank hold','Shrugging shoulders toward ears','Looking up which strains the neck muscles']}
+};
+
+// EX_INFO_KEYS for built-in lookup
+const EX_INFO_KEYS = Object.keys(EX_INFO);
+</script>
+<script>
+const AK='AIzaSyA26lTiOw9yCSSnUWMWoconW15pKUT9xZk';
+const DB='https://gym-tracker-4d57d-default-rtdb.firebaseio.com';
+const AU='https://identitytoolkit.googleapis.com/v1/accounts';
+const ADMIN='XXKDNEZFUoTe9Wmm6TvqxQHLDtU2';
+const PNAMES={ppl:'Push Pull Legs',bro:'Bro Split',muscle:'Muscle Gain',upper:'Upper/Lower',wl1:'WL Phase 1',wl2:'WL Phase 2',wl3:'WL Phase 3',strength:'Strength',athletic:'Athletic',home:'Home',fullbody:'Full Body',mobility:'Mobility'};
+
+let S=null,curTab=0,exId=null,planId=null,msgUid=null;
+let U={},EX={},PL={};
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
+function toast(m,t){const el=$('toast');el.textContent=m;el.className='toast show '+(t||'ok');setTimeout(()=>el.className='toast',2500);}
+function loading(){$('content').innerHTML='<div style="text-align:center;padding:40px;color:#333;font-size:14px">⏳ Loading...</div>';}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+async function login(){
+  const email=$('aEmail').value.trim(), pass=$('aPass').value;
+  if(!email||!pass){showErr('Enter email and password');return;}
+  const btn=$('aBtn');btn.disabled=true;btn.textContent='Logging in...';
+  try{
+    const r=await fetch(`${AU}:signInWithPassword?key=${AK}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,returnSecureToken:true})});
+    const d=await r.json();
+    if(d.error) showErr({INVALID_LOGIN_CREDENTIALS:'Wrong email or password.',EMAIL_NOT_FOUND:'Email not found.'}[d.error.message]||d.error.message);
+    else if(d.localId!==ADMIN) showErr('Access denied — not an admin account.');
+    else{S={t:d.idToken,uid:d.localId,email:d.email};localStorage.setItem('ga',JSON.stringify(S));showDash();}
+  }catch(e){showErr('Network error.');}
+  btn.disabled=false;btn.textContent='Login →';
+}
+function showErr(m){const e=$('aErr');e.textContent='⚠️ '+m;e.style.display='block';}
+function logout(){localStorage.removeItem('ga');S=null;$('sDash').style.display='none';$('sAuth').style.display='block';}
+
+async function showDash(){
+  $('sAuth').style.display='none';
+  $('sDash').style.display='block';
+  $('adminSub').textContent='Logged in: '+S.email;
+  loading();
+  await loadAll();
+  tab(0);
+}
+
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
+async function fbG(p){try{const r=await fetch(`${DB}/${p}.json?auth=${S.t}`);return r.json();}catch(_){return null;}}
+async function fbS(p,d){try{const r=await fetch(`${DB}/${p}.json?auth=${S.t}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});return r.ok;}catch(_){return false;}}
+async function fbD(p){try{await fetch(`${DB}/${p}.json?auth=${S.t}`,{method:'DELETE'});return true;}catch(_){return false;}}
+async function fbPost(p,d){try{const r=await fetch(`${DB}/${p}.json?auth=${S.t}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});return r.json();}catch(_){return null;}}
+
+async function loadAll(){
+  const [u,e,pl]=await Promise.all([fbG('users'),fbG('adminExercises'),fbG('adminPlans')]);
+  U=u||{};EX=e||{};PL=pl||{};
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function tab(n){
+  curTab=n;
+  [0,1,2,3,4].forEach(i=>$(('t'+i)).classList.toggle('active',i===n));
+  [renderOverview,renderUsers,renderExercises,renderPlans,renderMessages][n]();
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────────
+function renderOverview(){
+  const uids=Object.keys(U);
+  let totalSets=0,totalDays=0; const pc={};
+  // Per-user stats
+  const userStats=uids.map(uid=>{
+    const p=U[uid]?.profile||{};
+    const md=U[uid]?.monthData||{};
+    let sets=0,activeDays=0;
+    Object.values(md).forEach(m=>{
+      const done=m?.done||{};
+      const daySet=new Set();
+      Object.entries(done).forEach(([k,v])=>{if(v){sets++;daySet.add(k.split('-')[0]);}});
+      activeDays+=daySet.size;
+    });
+    totalSets+=sets;
+    totalDays+=activeDays;
+    if(p.planId) pc[p.planId]=(pc[p.planId]||0)+1;
+    return{uid,p,sets,activeDays};
+  });
+  const avgSets=uids.length?Math.round(totalSets/uids.length):0;
+  const avgDays=uids.length?Math.round(totalDays/uids.length):0;
+  // Plan usage rows
+  const planRows=Object.entries(pc).sort((a,b)=>b[1]-a[1]).map(([id,c])=>{
+    const pct=Math.round(c/uids.length*100)||0;
+    return`<tr>
+      <td style="font-weight:600;color:#f0f0f0">${PNAMES[id]||id}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div style="flex:1;background:#111;border-radius:4px;height:6px"><div style="width:${pct}%;background:#378ADD;height:6px;border-radius:4px"></div></div>
+        <span style="color:#378ADD;font-size:11px;min-width:20px">${c}</span>
+      </div></td>
+    </tr>`;
+  }).join('');
+  // Top users by sets
+  const topUsers=userStats.sort((a,b)=>b.sets-a.sets).slice(0,5).map(({p,sets,activeDays})=>
+    `<tr>
+      <td style="font-weight:600;color:#f0f0f0">${p.name||'—'}</td>
+      <td style="color:#555;font-size:11px">${p.email||'—'}</td>
+      <td><span class="badge" style="background:rgba(24,95,165,.12);color:#378ADD">${PNAMES[p.planId]||p.planId||'—'}</span></td>
+      <td style="color:#3B6D11;font-weight:600">${sets}</td>
+      <td style="color:#854F0B">${activeDays}d</td>
+    </tr>`
+  ).join('');
+  $('content').innerHTML=`
+  <div class="stat-row">
+    <div class="sc"><div class="sc-val" style="color:#378ADD">${uids.length}</div><div class="sc-lbl">Users</div></div>
+    <div class="sc"><div class="sc-val" style="color:#3B6D11">${totalSets}</div><div class="sc-lbl">Total Sets</div></div>
+    <div class="sc"><div class="sc-val" style="color:#854F0B">${avgSets}</div><div class="sc-lbl">Avg Sets/User</div></div>
+    <div class="sc"><div class="sc-val" style="color:#534AB7">${avgDays}</div><div class="sc-lbl">Avg Days/User</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+    <div class="card">
+      <div class="card-hdr">📊 Plan Usage</div>
+      ${planRows?`<table class="tbl"><thead><tr><th>Plan</th><th>Users</th></tr></thead><tbody>${planRows}</tbody></table>`:'<div class="empty">No users yet</div>'}
+    </div>
+    <div class="card">
+      <div class="card-hdr">🏆 Most Active Users</div>
+      ${topUsers?`<table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Sets</th><th>Days</th></tr></thead><tbody>${topUsers}</tbody></table>`:'<div class="empty">No data yet</div>'}
+    </div>
+  </div>`;
+}
+
+// ── USERS ─────────────────────────────────────────────────────────────────────
+function renderUsers(){
+  const uids=Object.keys(U);
+  const rows=uids.map(uid=>{
+    const p=U[uid]?.profile||{};
+    const md=U[uid]?.monthData||{};
+    let sets=0,activeDays=0;
+    Object.values(md).forEach(m=>{
+      const done=m?.done||{};
+      const daySet=new Set();
+      Object.entries(done).forEach(([k,v])=>{if(v){sets++;daySet.add(k.split('-')[0]);}});
+      activeDays+=daySet.size;
+    });
+    // Monthly trend: last 3 months sets
+    const months=Object.keys(md).sort().slice(-3);
+    const trend=months.map(mo=>{
+      const s=Object.values(md[mo]?.done||{}).filter(Boolean).length;
+      return`<span style="font-size:10px;color:#555">${mo.slice(5)}: <b style="color:#f0f0f0">${s}</b></span>`;
+    }).join(' · ');
+    return`<tr>
+      <td>
+        <div style="font-weight:600;color:#f0f0f0">${p.name||'—'}</div>
+        <div style="font-size:10px;color:#444">${p.email||uid.slice(0,14)+'...'}</div>
+      </td>
+      <td><span class="badge" style="background:rgba(24,95,165,.12);color:#378ADD">${PNAMES[p.planId]||p.planId||'—'}</span></td>
+      <td><span class="badge" style="background:rgba(83,74,183,.12);color:#534AB7">${p.level||'—'}</span></td>
+      <td style="color:#aaa">${p.weight?p.weight+' kg':'—'}</td>
+      <td style="color:#3B6D11;font-weight:600">${sets}</td>
+      <td style="color:#854F0B">${activeDays}d</td>
+      <td style="font-size:10px">${trend||'—'}</td>
+      <td style="display:flex;gap:4px">
+        <button class="ebtn" onclick="showUserDetail('${uid}')">📊</button>
+        <button class="ebtn" onclick="openMsg('${uid}','${(p.name||'User').replace(/'/g,"\\'")}')">💬</button>
+      </td>
+    </tr>`;
+  }).join('');
+  $('content').innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-size:13px;color:#555">${uids.length} registered user${uids.length!==1?'s':''}</div>
+    <button class="sbtn" onclick="loadAll().then(renderUsers)">🔄 Refresh</button>
+  </div>
+  <div class="card">
+    <table class="tbl">
+      <thead><tr><th>Name</th><th>Plan</th><th>Level</th><th>Weight</th><th>Sets</th><th>Days</th><th>Monthly Trend</th><th>Actions</th></tr></thead>
+      <tbody>${rows||`<tr><td colspan="8" class="empty">No users registered yet</td></tr>`}</tbody>
+    </table>
+  </div>
+  <div id="userDetailMov" class="mov">
+    <div class="mov-box" style="max-width:520px">
+      <div class="mov-hdr"><span id="userDetailTitle">User Detail</span><button class="xcbtn" onclick="closeUserDetail()">✕</button></div>
+      <div id="userDetailBody" style="padding:12px"></div>
+    </div>
+  </div>`;
+}
+
+function showUserDetail(uid){
+  const p=U[uid]?.profile||{};
+  const md=U[uid]?.monthData||{};
+  // Monthly breakdown
+  const months=Object.keys(md).sort();
+  const monthRows=months.map(mo=>{
+    const done=md[mo]?.done||{};
+    let sets=0; const daySet=new Set();
+    Object.entries(done).forEach(([k,v])=>{if(v){sets++;daySet.add(k.split('-')[0]);}});
+    const days=daySet.size;
+    // Bar visual
+    const bar=Math.round(days/31*100);
+    return`<tr>
+      <td style="color:#f0f0f0;font-weight:600">${mo}</td>
+      <td style="color:#3B6D11">${sets} sets</td>
+      <td style="color:#854F0B">${days} days</td>
+      <td style="width:80px"><div style="background:#111;border-radius:3px;height:5px"><div style="width:${bar}%;background:#378ADD;height:5px;border-radius:3px"></div></div></td>
+    </tr>`;
+  }).join('');
+  // Total stats
+  let total=0,totalDays=0;
+  months.forEach(mo=>{
+    const done=md[mo]?.done||{};
+    const daySet=new Set();
+    Object.entries(done).forEach(([k,v])=>{if(v){total++;daySet.add(k.split('-')[0]);}});
+    totalDays+=daySet.size;
+  });
+  $('userDetailTitle').textContent=(p.name||'User')+' — Workout Details';
+  $('userDetailBody').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      <div class="sc" style="margin:0"><div class="sc-val" style="color:#3B6D11;font-size:20px">${total}</div><div class="sc-lbl">Total Sets</div></div>
+      <div class="sc" style="margin:0"><div class="sc-val" style="color:#854F0B;font-size:20px">${totalDays}</div><div class="sc-lbl">Total Days</div></div>
+      <div class="sc" style="margin:0"><div class="sc-val" style="color:#534AB7;font-size:20px">${months.length}</div><div class="sc-lbl">Active Months</div></div>
+    </div>
+    <div style="font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Profile</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;font-size:12px">
+      <div style="color:#555">Plan: <span style="color:#378ADD">${PNAMES[p.planId]||p.planId||'—'}</span></div>
+      <div style="color:#555">Level: <span style="color:#f0f0f0">${p.level||'—'}</span></div>
+      <div style="color:#555">Weight: <span style="color:#f0f0f0">${p.weight?p.weight+' kg':'—'}</span></div>
+      <div style="color:#555">Age: <span style="color:#f0f0f0">${p.age||'—'}</span></div>
+      <div style="color:#555">Height: <span style="color:#f0f0f0">${p.height?p.height+' cm':'—'}</span></div>
+      <div style="color:#555">Gender: <span style="color:#f0f0f0">${p.gender||'—'}</span></div>
+    </div>
+    <div style="font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Monthly Breakdown</div>
+    ${monthRows?`<table class="tbl"><thead><tr><th>Month</th><th>Sets</th><th>Days</th><th>Activity</th></tr></thead><tbody>${monthRows}</tbody></table>`:'<div class="empty">No workout data yet</div>'}
+    <div style="margin-top:12px;text-align:right">
+      <button class="ebtn" onclick="openMsg('${uid}','${(p.name||'User').replace(/'/g,"\\'")}')">💬 Message</button>
+    </div>`;
+  $('userDetailMov').classList.add('show');
+}
+function closeUserDetail(){$('userDetailMov').classList.remove('show');}
+
+// ── EXERCISES ─────────────────────────────────────────────────────────────────
+function renderExercises(){
+  // Firebase custom exercises
+  const exs=Object.entries(EX);
+  const customRows=exs.map(([id,ex])=>
+    `<tr>
+      <td style="font-weight:600;color:#f0f0f0">${ex.name}</td>
+      <td style="color:#555;font-size:11px">${ex.muscles||'—'}</td>
+      <td>${ex.gif?`<a href="${ex.gif}" target="_blank" style="color:#378ADD;font-size:11px">▶ View</a>`:'<span style="color:#333">—</span>'}</td>
+      <td><span class="badge" style="background:rgba(24,95,165,.15);color:#378ADD">Custom</span></td>
+      <td style="display:flex;gap:5px">
+        <button class="ebtn" onclick="openEx('${id}')">✏️</button>
+        <button class="dbtn" onclick="delEx('${id}')">🗑</button>
+      </td>
+    </tr>`
+  ).join('');
+  // Built-in EX_INFO — each has an Edit button to override GIF/muscles in Firebase
+  const builtinRows=EX_INFO_KEYS.map(name=>{
+    const ex=EX_INFO[name];
+    // Check if this built-in has been overridden in Firebase
+    const overrideId='builtin__'+name.replace(/[^a-z0-9]/g,'_');
+    const ov=EX[overrideId];
+    return`<tr>
+      <td style="font-weight:600;color:#ccc">${name}${ov?` <span style="color:#7ed87e;font-size:10px">✓ edited</span>`:''}</td>
+      <td style="color:#555;font-size:11px">${(ex.muscles||[]).join(', ')||'—'}</td>
+      <td>${(ov?.gif||ex.gif)?`<a href="${ov?.gif||ex.gif}" target="_blank" style="color:#378ADD;font-size:11px">▶ View</a>`:'<span style="color:#333">—</span>'}</td>
+      <td><span class="badge" style="background:rgba(59,109,17,.15);color:#3B6D11">Built-in</span></td>
+      <td><button class="ebtn" onclick="openExBuiltin('${name.replace(/'/g,"\\'")}')">✏️ Edit</button></td>
+    </tr>`;
+  }).join('');
+  $('content').innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0">Exercise Info Library</div>
+      <div style="font-size:11px;color:#555;margin-top:2px">Edit any exercise to update GIF shown in user app</div>
+    </div>
+    <button class="sbtn" onclick="openEx()">+ Add New</button>
+  </div>
+  ${customRows?`<div class="card" style="margin-bottom:10px">
+    <div class="card-hdr" style="font-size:12px;color:#378ADD">⚙️ Custom (${exs.length})</div>
+    <table class="tbl"><thead><tr><th>Name</th><th>Muscles</th><th>GIF</th><th>Type</th><th>Actions</th></tr></thead>
+    <tbody>${customRows}</tbody></table>
+  </div>`:''}
+  <div class="card">
+    <div class="card-hdr" style="font-size:12px;color:#3B6D11">✅ Built-in Exercises (${EX_INFO_KEYS.length}) — click ✏️ to edit GIF</div>
+    <table class="tbl"><thead><tr><th>Name</th><th>Muscles</th><th>GIF</th><th>Type</th><th>Actions</th></tr></thead>
+    <tbody>${builtinRows}</tbody>
+  </div>`;
+}
+// Edit a built-in exercise (save override to Firebase)
+function openExBuiltin(name){
+  const ex=EX_INFO[name]||{};
+  const overrideId='builtin__'+name.replace(/[^a-z0-9]/g,'_');
+  const ov=EX[overrideId]||{};
+  exId=overrideId;
+  $('exMT').textContent='Edit: '+name;
+  $('emN').value=name;
+  $('emM').value=(ov.muscles||ex.muscles||[]).join?((ov.muscles||ex.muscles||[]).join(', ')):(ov.muscles||ex.muscles||'');
+  $('emG').value=ov.gif||ex.gif||'';
+  $('emW').value=ov.why||ex.why||'';
+  $('emH').value=(ov.how||ex.how||[]).join('\n');
+  $('emMi').value=(ov.mistakes||ex.mistakes||[]).join('\n');
+  $('exMov').classList.add('show');
+}
+function openEx(id){
+  exId=id||null;
+  $('exMT').textContent=id?'Edit Exercise Info':'Add Exercise Info';
+  if(id&&EX[id]){const e=EX[id];$('emN').value=e.name||'';$('emM').value=Array.isArray(e.muscles)?e.muscles.join(', '):(e.muscles||'');$('emG').value=e.gif||'';$('emW').value=e.why||'';$('emH').value=(e.how||[]).join('\n');$('emMi').value=(e.mistakes||[]).join('\n');}
+  else['emN','emM','emG','emW','emH','emMi'].forEach(i=>$(i).value='');
+  $('exMov').classList.add('show');
+}
+async function saveEx(){
+  const name=$('emN').value.trim();
+  if(!name){toast('Enter exercise name','err');return;}
+  const ex={name,muscles:$('emM').value.trim(),gif:$('emG').value.trim(),why:$('emW').value.trim(),how:$('emH').value.split('\n').map(s=>s.trim()).filter(Boolean),mistakes:$('emMi').value.split('\n').map(s=>s.trim()).filter(Boolean),ts:Date.now()};
+  const id=exId||Date.now().toString();
+  if(await fbS('adminExercises/'+id,ex)){EX[id]=ex;closeEx();renderExercises();toast('Saved ✓');}
+  else toast('Save failed','err');
+}
+async function delEx(id){if(!confirm('Delete?'))return;await fbD('adminExercises/'+id);delete EX[id];renderExercises();toast('Deleted');}
+function closeEx(){$('exMov').classList.remove('show');exId=null;}
+
+// ── PLANS ─────────────────────────────────────────────────────────────────────
+function renderPlans(){
+  const ps=Object.entries(PL);
+  const customRows=ps.map(([id,p])=>
+    `<tr>
+      <td><span style="font-size:16px;margin-right:6px">${p.icon||'📋'}</span><span style="font-weight:600;color:#f0f0f0">${p.name}</span></td>
+      <td><span class="badge" style="background:rgba(24,95,165,.12);color:#378ADD">${p.goal||'—'}</span></td>
+      <td style="color:#777">${p.level||'all'}</td>
+      <td style="color:#777">${p.days?p.days+'d/wk':'—'}</td>
+      <td style="display:flex;gap:5px">
+        <button class="ebtn" onclick="openPlan('${id}')">✏️</button>
+        <button class="dbtn" onclick="delPlan('${id}')">🗑</button>
+      </td>
+    </tr>`
+  ).join('');
+  const BUILTIN_PLANS=[
+    {id:'ppl',icon:'⚡',name:'Push Pull Legs',goal:'muscle',level:'intermediate',days:'6'},
+    {id:'bro',icon:'💪',name:'Bro Split',goal:'muscle',level:'beginner',days:'5'},
+    {id:'muscle',icon:'🏆',name:'Muscle Gain',goal:'muscle',level:'all',days:'4'},
+    {id:'upper',icon:'🔄',name:'Upper/Lower',goal:'strength',level:'intermediate',days:'4'},
+    {id:'wl1',icon:'🔥',name:'WL Phase 1',goal:'fat_loss',level:'beginner',days:'3'},
+    {id:'wl2',icon:'🔥',name:'WL Phase 2',goal:'fat_loss',level:'intermediate',days:'4'},
+    {id:'wl3',icon:'🔥',name:'WL Phase 3',goal:'fat_loss',level:'advanced',days:'5'},
+    {id:'strength',icon:'🏋️',name:'Strength',goal:'strength',level:'intermediate',days:'4'},
+    {id:'athletic',icon:'🏃',name:'Athletic',goal:'athletic',level:'intermediate',days:'5'},
+    {id:'home',icon:'🏠',name:'Home Workout',goal:'general',level:'all',days:'4'},
+    {id:'fullbody',icon:'🌟',name:'Full Body',goal:'muscle',level:'beginner',days:'3'},
+    {id:'mobility',icon:'🧘',name:'Mobility',goal:'general',level:'all',days:'3'},
+  ];
+  const builtinRows=BUILTIN_PLANS.map(p=>
+    `<tr>
+      <td><span style="font-size:16px;margin-right:6px">${p.icon}</span><span style="font-weight:600;color:#ccc">${p.name}</span></td>
+      <td><span class="badge" style="background:rgba(24,95,165,.12);color:#378ADD">${p.goal}</span></td>
+      <td style="color:#555">${p.level}</td>
+      <td style="color:#555">${p.days}d/wk</td>
+      <td style="color:#333;font-size:11px">Built-in</td>
+    </tr>`
+  ).join('');
+  $('content').innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#f0f0f0">Plans</div>
+      <div style="font-size:11px;color:#555;margin-top:2px">Users see all built-in plans + your custom plans</div>
+    </div>
+    <button class="sbtn" onclick="openPlan()">+ Add Custom Plan</button>
+  </div>
+  ${customRows?`<div class="card" style="margin-bottom:10px">
+    <div class="card-hdr" style="font-size:12px;color:#378ADD">⚙️ Custom Plans (${ps.length})</div>
+    <table class="tbl"><thead><tr><th>Plan Name</th><th>Goal</th><th>Level</th><th>Days</th><th>Actions</th></tr></thead>
+    <tbody>${customRows}</tbody></table>
+  </div>`:''}
+  <div class="card">
+    <div class="card-hdr" style="font-size:12px;color:#3B6D11">✅ Built-in Plans (12)</div>
+    <table class="tbl"><thead><tr><th>Plan Name</th><th>Goal</th><th>Level</th><th>Days</th><th>Actions</th></tr></thead>
+    <tbody>${builtinRows}</tbody></table>
+  </div>`;
+}
+function openPlan(id){
+  planId=id||null;
+  $('planMT').textContent=id?'Edit Plan':'Add Plan';
+  if(id&&PL[id]){const p=PL[id];$('pmN').value=p.name||'';$('pmI').value=p.icon||'';$('pmG').value=p.goal||'muscle';$('pmD').value=p.days||'';$('pmL').value=p.level||'all';$('pmDsc').value=p.desc||'';}
+  else['pmN','pmI','pmD','pmDsc'].forEach(i=>$(i).value='');
+  $('planMov').classList.add('show');
+}
+async function savePlan(){
+  const name=$('pmN').value.trim();
+  if(!name){toast('Enter plan name','err');return;}
+  const p={name,icon:$('pmI').value||'📋',goal:$('pmG').value,days:$('pmD').value,level:$('pmL').value,desc:$('pmDsc').value,ts:Date.now()};
+  const id=planId||Date.now().toString();
+  if(await fbS('adminPlans/'+id,p)){PL[id]=p;closePlan();renderPlans();toast('Plan saved ✓');}
+  else toast('Save failed','err');
+}
+async function delPlan(id){if(!confirm('Delete?'))return;await fbD('adminPlans/'+id);delete PL[id];renderPlans();toast('Deleted');}
+function closePlan(){$('planMov').classList.remove('show');planId=null;}
+
+// ── MESSAGES ──────────────────────────────────────────────────────────────────
+function renderMessages(){
+  const msgs=[];
+  Object.entries(U).forEach(([uid,u])=>{
+    Object.values(u?.messages||{}).forEach(m=>msgs.push({...m,uname:u?.profile?.name||uid.slice(0,8)}));
+  });
+  msgs.sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const rows=msgs.slice(0,30).map(m=>
+    `<tr><td style="font-weight:600">${m.uname}</td><td style="color:#777;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.text}</td><td style="color:#333;font-size:11px">${new Date(m.ts||0).toLocaleDateString()}</td></tr>`
+  ).join('');
+  $('content').innerHTML=`
+  <div style="font-size:13px;color:#555;margin-bottom:12px">Go to Users tab → 💬 button to message a specific user</div>
+  <div class="card">
+    <div class="card-hdr">💬 Sent Messages (${msgs.length})</div>
+    ${rows?`<table class="tbl"><thead><tr><th>To</th><th>Message</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No messages sent yet.</div>'}
+  </div>`;
+}
+function openMsg(uid,name){msgUid=uid;$('msgTo').value=name;$('msgTxt').value='';$('msgMov').classList.add('show');}
+async function sendMsg(){
+  const text=$('msgTxt').value.trim();
+  if(!text){toast('Enter message','err');return;}
+  if(await fbPost(`users/${msgUid}/messages`,{text,ts:Date.now(),from:'admin',read:false})){closeMsg();toast('Message sent ✓');}
+  else toast('Failed','err');
+}
+function closeMsg(){$('msgMov').classList.remove('show');msgUid=null;}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+window.onload=async()=>{
+  const sv=localStorage.getItem('ga');
+  if(sv){try{S=JSON.parse(sv);await showDash();}catch(_){localStorage.removeItem('ga');}}
+};
+</script>
+</body>
+</html>
