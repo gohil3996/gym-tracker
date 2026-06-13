@@ -634,19 +634,19 @@ function renderDietView(containerId, profile) {
   let html = `
   <div style="padding:0 16px 16px">
     <!-- Type Toggle -->
-    <div style="display:flex;background:#111;border-radius:12px;padding:4px;margin-bottom:16px">
+    <div style="display:flex;background:rgba(79,110,247,0.08);border-radius:14px;padding:4px;margin-bottom:16px;border:1px solid rgba(79,110,247,0.1)">
       <button onclick="switchDietType('vegetarian')" id="dt_veg"
-        style="flex:1;padding:9px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all .2s;background:${type==='vegetarian'?'#1e2e1e':'transparent'};color:${type==='vegetarian'?'#7ed87e':'#555'}">
+        style="flex:1;padding:9px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all .2s;background:${type==='vegetarian'?'white':'transparent'};color:${type==='vegetarian'?'#10b981':'#8892b0'};box-shadow:${type==='vegetarian'?'0 2px 12px rgba(16,185,129,0.2)':'none'}">
         🌿 Vegetarian
       </button>
       <button onclick="switchDietType('non-vegetarian')" id="dt_nonveg"
-        style="flex:1;padding:9px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all .2s;background:${type!=='vegetarian'?'#2e1a0e':'transparent'};color:${type!=='vegetarian'?'#e07a30':'#555'}">
+        style="flex:1;padding:9px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all .2s;background:${type!=='vegetarian'?'white':'transparent'};color:${type!=='vegetarian'?'#f59e0b':'#8892b0'};box-shadow:${type!=='vegetarian'?'0 2px 12px rgba(245,158,11,0.2)':'none'}">
         🍗 Non-Veg
       </button>
     </div>`;
 
   if (!plan) {
-    html += `<div style="text-align:center;padding:40px;color:#333;font-size:13px">No plan found. Please update your profile.</div></div>`;
+    html += `<div style="text-align:center;padding:40px;color:#8892b0;font-size:13px">No plan found. Please update your profile.</div></div>`;
     c.innerHTML = html; return;
   }
 
@@ -656,28 +656,28 @@ function renderDietView(containerId, profile) {
 
   // Header card
   html += `
-    <div style="background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:14px;padding:16px;margin-bottom:14px">
+    <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.9);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <span style="font-size:28px">${plan.icon}</span>
         <div>
-          <div style="font-size:15px;font-weight:700;color:#f0f0f0">${plan.name}</div>
-          <div style="font-size:11px;color:#555;margin-top:2px">${plan.desc}</div>
+          <div style="font-size:15px;font-weight:700;color:#0f1729">${plan.name}</div>
+          <div style="font-size:11px;color:#8892b0;margin-top:2px">${plan.desc}</div>
         </div>
       </div>
       <!-- Calorie targets -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;background:#161616;border-radius:10px;padding:12px">
-        <div><div style="font-size:18px;font-weight:800;color:#378ADD">${targetCals}</div><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;margin-top:2px">Calories</div></div>
-        <div><div style="font-size:18px;font-weight:800;color:#e05555">${profile.weight?Math.round(parseFloat(profile.weight)*2.2)+'g':'—'}</div><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;margin-top:2px">Protein</div></div>
-        <div><div style="font-size:18px;font-weight:800;color:#FF9500">${deficit?'Low':'High'}</div><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;margin-top:2px">Carbs</div></div>
-        <div><div style="font-size:18px;font-weight:800;color:#1D9E75">${deficit?'—'+deficit:surplus?'+'+surplus:'0'}</div><div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;margin-top:2px">vs TDEE</div></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;background:rgba(79,110,247,0.06);border-radius:12px;padding:12px;border:1px solid rgba(79,110,247,0.1)">
+        <div><div style="font-size:18px;font-weight:800;color:#4f6ef7">${targetCals}</div><div style="font-size:9px;color:#8892b0;font-weight:700;text-transform:uppercase;margin-top:2px">Calories</div></div>
+        <div><div style="font-size:18px;font-weight:800;color:#ef4444">${profile.weight?Math.round(parseFloat(profile.weight)*2.2)+'g':'—'}</div><div style="font-size:9px;color:#8892b0;font-weight:700;text-transform:uppercase;margin-top:2px">Protein</div></div>
+        <div><div style="font-size:18px;font-weight:800;color:#FF9500">${deficit?'Low':'High'}</div><div style="font-size:9px;color:#8892b0;font-weight:700;text-transform:uppercase;margin-top:2px">Carbs</div></div>
+        <div><div style="font-size:18px;font-weight:800;color:#1D9E75">${deficit?'—'+deficit:surplus?'+'+surplus:'0'}</div><div style="font-size:9px;color:#8892b0;font-weight:700;text-transform:uppercase;margin-top:2px">vs TDEE</div></div>
       </div>
     </div>`;
 
   // Rules
   html += `
-    <div style="background:#0a1525;border:0.5px solid #185FA5;border-radius:12px;padding:12px;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:700;color:#378ADD;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📋 Key Rules</div>
-      ${plan.rules.map(r=>`<div style="font-size:12px;color:#aaa;padding:3px 0;display:flex;gap:6px"><span style="color:#378ADD;flex-shrink:0">→</span>${r}</div>`).join('')}
+    <div style="background:rgba(79,110,247,0.06);border:1px solid rgba(79,110,247,0.2);border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:800;color:#4f6ef7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📋 Key Rules</div>
+      ${plan.rules.map(r=>`<div style="font-size:12px;color:#4a5578;padding:3px 0;display:flex;gap:6px"><span style="color:#4f6ef7;flex-shrink:0">→</span>${r}</div>`).join('')}
     </div>`;
 
   // Meals
@@ -687,18 +687,18 @@ function renderDietView(containerId, profile) {
     const meals = plan.meals[mt] || [];
     html += `
       <div style="margin-bottom:14px">
-        <div style="font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:8px">${mealIcons[mt]} ${mt.charAt(0).toUpperCase()+mt.slice(1)} Options</div>
+        <div style="font-size:13px;font-weight:800;color:#0f1729;margin-bottom:8px">${mealIcons[mt]} ${mt.charAt(0).toUpperCase()+mt.slice(1)} Options</div>
         ${meals.map((m,i)=>`
-        <div style="background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px;margin-bottom:6px">
+        <div style="background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.9);border-radius:14px;padding:13px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-            <div style="font-size:13px;font-weight:600;color:#f0f0f0">${m.name}</div>
-            <div style="font-size:11px;color:#378ADD;font-weight:700;flex-shrink:0;margin-left:8px">${m.cals} kcal</div>
+            <div style="font-size:13px;font-weight:700;color:#0f1729">${m.name}</div>
+            <div style="font-size:11px;color:#4f6ef7;font-weight:800;flex-shrink:0;margin-left:8px">${m.cals} kcal</div>
           </div>
-          <div style="font-size:11px;color:#555;margin-bottom:6px">${m.desc}</div>
+          <div style="font-size:11px;color:#8892b0;margin-bottom:7px">${m.desc}</div>
           <div style="display:flex;gap:10px">
-            <span style="font-size:10px;color:#e05555">P: ${m.protein}g</span>
-            <span style="font-size:10px;color:#FF9500">C: ${m.carbs}g</span>
-            <span style="font-size:10px;color:#1D9E75">F: ${m.fat}g</span>
+            <span style="font-size:10px;color:#ef4444;font-weight:700">P: ${m.protein}g</span>
+            <span style="font-size:10px;color:#f59e0b;font-weight:700">C: ${m.carbs}g</span>
+            <span style="font-size:10px;color:#10b981;font-weight:700">F: ${m.fat}g</span>
           </div>
         </div>`).join('')}
       </div>`;
@@ -706,9 +706,9 @@ function renderDietView(containerId, profile) {
 
   // Tips
   html += `
-    <div style="background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:12px;padding:12px">
-      <div style="font-size:11px;font-weight:700;color:#FF9500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">💡 Expert Tips</div>
-      ${plan.tips.map(t=>`<div style="font-size:12px;color:#aaa;padding:4px 0;border-bottom:0.5px solid #161616">${t}</div>`).join('')}
+    <div style="background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.9);border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+      <div style="font-size:11px;font-weight:800;color:#f59e0b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">💡 Expert Tips</div>
+      ${plan.tips.map(t=>`<div style="font-size:12px;color:#4a5578;padding:5px 0;border-bottom:1px solid rgba(200,210,240,0.3);font-weight:500">${t}</div>`).join('')}
     </div>
   </div>`;
 
