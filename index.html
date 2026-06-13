@@ -588,11 +588,17 @@ function renderDayScroll(){
     c.appendChild(el);
   }
 
-  // Scroll to active chip
+  // Scroll to today's date chip
   setTimeout(()=>{
     const chips=c.querySelectorAll('.day-chip');
-    if(chips[curDay])chips[curDay].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  },50);
+    const todayObj=indiaDate();
+    const todayDate=todayObj.getDate();
+    const [y,m]=viewMonth.split('-').map(Number);
+    const isCurrentMonth=(viewMonth===mk());
+    // Scroll to today if current month, else scroll to curDay
+    const targetIdx=isCurrentMonth?todayDate-1:curDay;
+    if(chips[targetIdx])chips[targetIdx].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  },80);
 }
 function renderDayPanel(){
   const plan=curPlan();
