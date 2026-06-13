@@ -222,6 +222,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .lvl-badge{display:inline-block;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px}
 .danger-btn{width:100%;padding:14px;border-radius:14px;border:1.5px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.06);color:var(--red);font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:10px}
 .out-btn{width:100%;padding:14px;border-radius:14px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.5);color:var(--text3);font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* WEIGHT GRAPH */
+.wg-wrap{padding:0 16px 16px}
+.wg-card{background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px}
+.wg-title{font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.wg-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.wg-inp-wrap{background:#161616;border-radius:10px;padding:10px;text-align:center}
+.wg-inp-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.wg-inp{width:100%;text-align:center;border:none;background:transparent;font-size:16px;font-weight:800;color:#f0f0f0;outline:none;font-family:inherit}
+.wg-graph{position:relative;height:160px;margin-bottom:8px}
+.wg-svg{width:100%;height:100%}
+.wg-labels{display:flex;justify-content:space-between;font-size:10px;color:#444;margin-top:4px}
+.wg-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+.wg-stat{background:#161616;border-radius:9px;padding:9px;text-align:center}
+.wg-stat-val{font-size:16px;font-weight:800;margin-bottom:2px}
+.wg-stat-lbl{font-size:9px;color:#555;font-weight:700;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -313,12 +329,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   <div id="vHistory" style="display:none"></div>
   <div id="vProfile" style="display:none"></div>
   <div id="vDiet" style="display:none"></div>
+  <div id="vWeight" style="display:none"></div>
 </div>
 <div class="bottom-nav">
   <button class="bnav-btn active" id="bn_workout" onclick="setNav('workout')"><span class="bni">🏋️</span>Workout</button>
   <button class="bnav-btn" id="bn_progress" onclick="setNav('progress')"><span class="bni">📊</span>Progress</button>
   <button class="bnav-btn" id="bn_history" onclick="setNav('history')"><span class="bni">📅</span>History</button>
   <button class="bnav-btn" id="bn_diet" onclick="setNav('diet')"><span class="bni">🥗</span>Diet</button>
+  <button class="bnav-btn" id="bn_weight" onclick="setNav('weight')"><span class="bni">⚖️</span>Weight</button>
   <button class="bnav-btn" id="bn_profile" onclick="setNav('profile')"><span class="bni">👤</span>Profile</button>
 </div>
 </div>
@@ -447,8 +465,8 @@ function initApp(){if(!viewMonth)viewMonth=mk();updateHero();updateStats();updat
 function updateHero(){const plan=curPlan();document.getElementById('hBadge').textContent='🏋️ '+plan.name;document.getElementById('hTitle').textContent=plan.days.length+'-Day Program';document.getElementById('hSub').textContent='☁️ Hi, '+(profile.name||'there');}
 function updateCalCard(){if(!profile.weight){document.getElementById('calCard').style.display='none';return;}const c=calcCals();document.getElementById('calCard').style.display='block';document.getElementById('calGrid').innerHTML=`<div><div class="cal-val" style="color:var(--accent)">${c.kcal}</div><div class="cal-lbl">Calories</div></div><div><div class="cal-val" style="color:var(--red)">${c.protein}g</div><div class="cal-lbl">Protein</div></div><div><div class="cal-val" style="color:#FF9500">${c.carbs}g</div><div class="cal-lbl">Carbs</div></div><div><div class="cal-val" style="color:#1D9E75">${c.fat}g</div><div class="cal-lbl">Fat</div></div>`;}
 function changeMonth(dir){const[y,m]=viewMonth.split('-').map(Number);viewMonth=mk(new Date(y,m-1+dir,1));document.getElementById('mLabel').textContent=mlbl(viewMonth);updateStats();renderDayScroll();renderDayPanel();if(curNav==='progress')renderProgress();if(curNav==='history')renderHistory();}
-function setNav(n){curNav=n;['workout','progress','history','profile','diet'].forEach(v=>{document.getElementById('v'+v.charAt(0).toUpperCase()+v.slice(1)).style.display=v===n?'block':'none';const b=document.getElementById('bn_'+v);if(b)b.classList.toggle('active',v===n);});renderTopNav();if(n==='progress')renderProgress();if(n==='history')renderHistory();if(n==='profile')renderProfile();if(n==='diet')renderDietView('vDiet',profile);}
-function renderTopNav(){document.getElementById('topNav').innerHTML=['workout','progress','history','diet','profile'].map(n=>`<button class="tnav-btn${curNav===n?' active':''}" onclick="setNav('${n}')">${{workout:'🏋️ Workout',progress:'📊 Progress',history:'📅 History',diet:'🥗 Diet',profile:'👤 Profile'}[n]}</button>`).join('');}
+function setNav(n){curNav=n;['workout','progress','history','profile','diet','weight'].forEach(v=>{document.getElementById('v'+v.charAt(0).toUpperCase()+v.slice(1)).style.display=v===n?'block':'none';const b=document.getElementById('bn_'+v);if(b)b.classList.toggle('active',v===n);});renderTopNav();if(n==='progress')renderProgress();if(n==='history')renderHistory();if(n==='profile')renderProfile();if(n==='diet')renderDietView('vDiet',profile);if(n==='weight')renderWeightGraph();}
+function renderTopNav(){document.getElementById('topNav').innerHTML=['workout','progress','history','diet','weight','profile'].map(n=>`<button class="tnav-btn${curNav===n?' active':''}" onclick="setNav('${n}')">${{workout:'🏋️ Workout',progress:'📊 Progress',history:'📅 History',diet:'🥗 Diet',weight:'⚖️ Weight',profile:'👤 Profile'}[n]}</button>`).join('');}
 function updateStats(){const plan=curPlan(),done=gDone(viewMonth);let sets=0,days=0,streak=0;plan.days.forEach((d,i)=>{const a=d.exercises.every((_,j)=>done[i+'-'+j]);if(a){days++;streak++;}d.exercises.forEach((ex,j)=>{if(done[i+'-'+j])sets+=ex.sets;});});document.getElementById('statsGrid').innerHTML=`<div class="stat-card" style="background:rgba(24,95,165,.12);border:0.5px solid rgba(24,95,165,.2)"><div class="stat-lbl" style="color:var(--accent)">Sets Done</div><div class="stat-val" style="color:var(--accent)">${sets}</div><div class="stat-sub" style="color:var(--accent)">${mlbl(viewMonth)}</div></div><div class="stat-card" style="background:rgba(59,109,17,.12);border:0.5px solid rgba(59,109,17,.2)"><div class="stat-lbl" style="color:#3B6D11">Days Done</div><div class="stat-val" style="color:#3B6D11">${days}/${plan.days.length}</div><div class="stat-sub" style="color:#3B6D11">completed</div></div><div class="stat-card" style="background:rgba(220,53,69,.1);border:0.5px solid rgba(220,53,69,.2)"><div class="stat-lbl" style="color:var(--red)">Protein</div><div class="stat-val" style="color:var(--red)">${profile.protein||calcCals().protein}g</div><div class="stat-sub" style="color:var(--red)">daily target</div></div><div class="stat-card" style="background:rgba(83,74,183,.12);border:0.5px solid rgba(83,74,183,.2)"><div class="stat-lbl" style="color:#534AB7">Streak</div><div class="stat-val" style="color:#534AB7">${streak}d</div><div class="stat-sub" style="color:#534AB7">this month</div></div>`;}
 function renderDayScroll(){const plan=curPlan(),done=gDone(viewMonth);const c=document.getElementById('dayScroll');c.innerHTML='';plan.days.forEach((d,i)=>{const allDone=d.exercises.every((_,j)=>done[i+'-'+j]);const el=document.createElement('div');el.className='day-chip'+(i===curDay?' active':'');el.style.borderColor=i===curDay?(d.sc||'#378ADD'):'#1e1e1e';el.innerHTML=(allDone?'<div class="done-dot"></div>':'')+`<div class="dnum" style="color:${d.sc}">${i+1}</div><div class="dlbl" style="color:${i===curDay?'#f0f0f0':'#555'}">${d.label}</div>`;el.onclick=()=>{curDay=i;renderDayScroll();renderDayPanel();};c.appendChild(el);});}
 function renderDayPanel(){
@@ -597,6 +615,123 @@ function showStreakDetail(){
   </div>`;
   overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
   document.body.appendChild(overlay);
+}
+
+
+// ── WEIGHT PROGRESS GRAPH ─────────────────────────────────────────────────────
+function saveWeightEntry(val){
+  if(!val||isNaN(val))return;
+  const today=getTodayKey();
+  if(!profile.weightLog)profile.weightLog={};
+  profile.weightLog[today]=parseFloat(val);
+  profile.weight=val;
+  sched();
+  renderWeightGraph();
+}
+
+function renderWeightGraph(){
+  const el=document.getElementById('vWeight');
+  if(!el)return;
+  const log=profile.weightLog||{};
+  const startW=parseFloat(profile.startWeight)||parseFloat(profile.weight)||0;
+  const goalW=parseFloat(profile.goalWeight)||0;
+  const curW=parseFloat(profile.weight)||0;
+
+  // Sort dates
+  const entries=Object.entries(log).sort((a,b)=>a[0].localeCompare(b[0]));
+  const last8=entries.slice(-8);
+
+  // Draw SVG graph
+  let svgContent='';
+  if(last8.length>=2){
+    const vals=last8.map(e=>e[1]);
+    const minV=Math.min(...vals)-2;
+    const maxV=Math.max(...vals)+2;
+    const w=300,h=120,pad=10;
+    const pts=last8.map((e,i)=>{
+      const x=pad+(i/(last8.length-1))*(w-pad*2);
+      const y=h-pad-((e[1]-minV)/(maxV-minV))*(h-pad*2);
+      return{x,y,v:e[1],d:e[0]};
+    });
+    // Gradient area
+    const pathD='M'+pts.map(p=>p.x+','+p.y).join(' L');
+    const areaD=pathD+' L'+pts[pts.length-1].x+','+(h-pad)+' L'+pts[0].x+','+(h-pad)+' Z';
+    svgContent+=`<defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#378ADD" stop-opacity=".4"/><stop offset="100%" stop-color="#378ADD" stop-opacity="0"/></linearGradient></defs>`;
+    svgContent+=`<path d="${areaD}" fill="url(#wg)"/>`;
+    svgContent+=`<polyline points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="#378ADD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    // Goal line
+    if(goalW){
+      const gy=h-pad-((goalW-minV)/(maxV-minV))*(h-pad*2);
+      if(gy>pad&&gy<h-pad){
+        svgContent+=`<line x1="${pad}" y1="${gy}" x2="${w-pad}" y2="${gy}" stroke="#639922" stroke-width="1" stroke-dasharray="4,3"/>`;
+        svgContent+=`<text x="${w-pad+2}" y="${gy+4}" font-size="9" fill="#639922">Goal</text>`;
+      }
+    }
+    // Dots + values
+    pts.forEach((p,i)=>{
+      svgContent+=`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#378ADD" stroke="#0f0f0f" stroke-width="2"/>`;
+      if(i===pts.length-1||i===0){
+        svgContent+=`<text x="${p.x}" y="${p.y-8}" text-anchor="middle" font-size="9" fill="#aaa">${p.v}kg</text>`;
+      }
+    });
+    svgContent+=`<rect width="${w}" height="${h}" fill="none"/>`;
+  } else {
+    svgContent='<text x="150" y="65" text-anchor="middle" font-size="12" fill="#333">Log weight daily to see graph</text>';
+  }
+
+  // Date labels
+  const dateLabels=last8.length>=2?`<div>${last8[0][0].slice(5)}</div><div>${last8[last8.length-1][0].slice(5)}</div>`:'';
+
+  // Stats
+  const change=last8.length>=2?(last8[last8.length-1][1]-last8[0][1]).toFixed(1):0;
+  const toGoal=goalW?(curW-goalW).toFixed(1):null;
+  const changeColor=change<0?'#639922':change>0?'#e05555':'#f0f0f0';
+
+  el.innerHTML=`<div class="wg-wrap">
+    <div class="wg-card">
+      <div class="wg-title">⚖️ Weight Progress
+        <span style="font-size:11px;color:#555;font-weight:400">${entries.length} entries</span>
+      </div>
+      <!-- Inputs -->
+      <div class="wg-inputs">
+        <div class="wg-inp-wrap">
+          <div class="wg-inp-lbl" style="color:#378ADD">Current (kg)</div>
+          <input class="wg-inp" type="number" step="0.1" placeholder="75" value="${curW||''}"
+            onchange="saveWeightEntry(this.value)" style="color:#378ADD"/>
+        </div>
+        <div class="wg-inp-wrap">
+          <div class="wg-inp-lbl" style="color:#639922">Start (kg)</div>
+          <input class="wg-inp" type="number" step="0.1" placeholder="80" value="${startW||''}"
+            onchange="profile.startWeight=this.value;sched();renderWeightGraph()" style="color:#639922"/>
+        </div>
+        <div class="wg-inp-wrap">
+          <div class="wg-inp-lbl" style="color:#FF9500">Goal (kg)</div>
+          <input class="wg-inp" type="number" step="0.1" placeholder="70" value="${goalW||''}"
+            onchange="profile.goalWeight=this.value;sched();renderWeightGraph()" style="color:#FF9500"/>
+        </div>
+      </div>
+      <!-- Graph -->
+      <div class="wg-graph">
+        <svg class="wg-svg" viewBox="0 0 300 120">${svgContent}</svg>
+      </div>
+      <div class="wg-labels">${dateLabels}</div>
+      <!-- Stats -->
+      <div class="wg-stats">
+        <div class="wg-stat">
+          <div class="wg-stat-val" style="color:${changeColor}">${change>0?'+':''}${change}kg</div>
+          <div class="wg-stat-lbl">Change</div>
+        </div>
+        <div class="wg-stat">
+          <div class="wg-stat-val" style="color:#f0f0f0">${curW||'—'}kg</div>
+          <div class="wg-stat-lbl">Current</div>
+        </div>
+        <div class="wg-stat">
+          <div class="wg-stat-val" style="color:#FF9500">${toGoal!==null?(toGoal>0?toGoal+'kg left':Math.abs(toGoal)+'kg over!'):'—'}</div>
+          <div class="wg-stat-lbl">To Goal</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
 window.onload=async()=>{switchTab('signup');const sv=localStorage.getItem('gym_s');if(sv){try{session=JSON.parse(sv);await loadData();await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');}}catch(_){localStorage.removeItem('gym_s');}}};
