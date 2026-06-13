@@ -417,7 +417,7 @@ const LEVELS=[
   {id:'advanced',icon:'🔴',name:'Advanced',desc:'3+ years. Serious training. Optimizing everything. 5-6 days.'},
 ];
 let session=null,profile={name:'',weight:'',age:'',height:'',gender:'male',protein:'',level:'intermediate',planId:'ppl'},customDays=null,monthData={},curDay=0,curNav='workout',viewMonth=null,saveTimer=null,obLevel=null,obPlan=null,editExKey=null,authMode='signup';
-function mk(d){const dt=d||new Date();return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');}
+function mk(d){const dt=d?indiaDate(d):indiaDate();return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');}
 function mlbl(k){const[y,m]=k.split('-');return new Date(y,m-1,1).toLocaleString('en',{month:'long',year:'numeric'});}
 function curPlan(){const p=WORKOUT_PLANS[profile.planId]||WORKOUT_PLANS.ppl;if(customDays)return{...p,days:customDays};return p;}
 function gDone(m){return(monthData[m]||{}).done||{};}
@@ -446,7 +446,7 @@ async function handleAuth(){
     const res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,returnSecureToken:true})});
     const data=await res.json();
     if(data.error){const msgs={'EMAIL_EXISTS':'This email is already registered.','INVALID_LOGIN_CREDENTIALS':'Incorrect email or password.','WEAK_PASSWORD : Password should be at least 6 characters':'Password must be 6 or more characters.','INVALID_EMAIL':'Please enter a valid email.'};showAErr(msgs[data.error.message]||data.error.message);}
-    else{session={token:data.idToken,uid:data.localId,email:data.email};localStorage.setItem('gym_s',JSON.stringify(session));await loadData();await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');toast('Welcome back, '+profile.name+'!');}}
+    else{session={token:data.idToken,uid:data.localId,email:data.email};localStorage.setItem('gym_s',JSON.stringify(session));await loadData();if(!profile.email)profile.email=data.email;await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');toast('Welcome back, '+profile.name+'!');}}
   }catch(e){showAErr('Network error. Check your connection.');}
   btn.disabled=false;btn.textContent=authMode==='login'?'Log In →':'Create Account →';
 }
@@ -505,6 +505,32 @@ function openPM(){document.getElementById('pmN').value=profile.name;document.get
 function savePM(){profile.name=document.getElementById('pmN').value.trim()||profile.name;profile.weight=document.getElementById('pmW').value;profile.age=document.getElementById('pmA').value;profile.height=document.getElementById('pmH').value;profile.gender=document.getElementById('pmG').value;profile.protein=document.getElementById('pmPr').value;sched();updateHero();updateCalCard();updateStats();renderProfile();closePM();toast('Profile updated ✓');}
 function closePM(){document.getElementById('profModal').classList.remove('show');}
 
+
+// ── INDIA TIMEZONE (IST = UTC+5:30) ──────────────────────────────────────────
+function indiaDate(d){
+  const dt=d||new Date();
+  const utc=dt.getTime()+dt.getTimezoneOffset()*60000;
+  return new Date(utc+5.5*3600000);
+}
+function dayDateKey(ym,dayOffset){
+  const[y,m]=ym.split('-').map(Number);
+  const dt=new Date(y,m-1,1+dayOffset);
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+function daysInMonth(ym){const[y,m]=ym.split('-').map(Number);return new Date(y,m,0).getDate();}
+function dayOfWeekShort(dateStr){
+  const[y,m,d]=dateStr.split('-').map(Number);
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return days[new Date(y,m-1,d).getDay()];
+}
+function shortDate(dateStr){
+  const[y,m,d]=dateStr.split('-').map(Number);
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d+' '+months[m-1];
+}
+function todayIST(){const d=indiaDate();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function yesterdayIST(){const d=indiaDate();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
 // ── STREAK SYSTEM ─────────────────────────────────────────────────────────────
 function getTodayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function getYesterdayKey(){ const d=new Date(); d.setDate(d.getDate()-1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -514,7 +540,7 @@ function updateStreakData(){
   const done=gDone(viewMonth||mk());
   const hasAnyDone=Object.values(done).some(v=>v);
   if(!hasAnyDone) return;
-  const today=getTodayKey();
+  const today=todayIST();
   if(!profile.streakDates) profile.streakDates=[];
   if(!profile.streakDates.includes(today)){
     profile.streakDates.push(today);
@@ -531,8 +557,8 @@ function recalcStreak(){
   if(!dates.length){profile.currentStreak=0;return;}
   // Current streak
   let streak=0;
-  const today=getTodayKey();
-  const yesterday=getYesterdayKey();
+  const today=todayIST();
+  const yesterday=yesterdayIST();
   const last=dates[dates.length-1];
   if(last!==today&&last!==yesterday){profile.currentStreak=0;}
   else{
@@ -623,7 +649,7 @@ function showStreakDetail(){
 // ── WEIGHT PROGRESS GRAPH ─────────────────────────────────────────────────────
 function saveWeightEntry(val){
   if(!val||isNaN(val))return;
-  const today=getTodayKey();
+  const today=todayIST();
   if(!profile.weightLog)profile.weightLog={};
   profile.weightLog[today]=parseFloat(val);
   profile.weight=val;
@@ -741,7 +767,7 @@ function renderWeightGraph(){
 function getAICoachInsights(){
   const plan=curPlan();
   const today=new Date();
-  const todayKey=getTodayKey();
+  const todayKey=todayIST();
   const msgs=[];
   const done=gDone(viewMonth||mk());
   const dates=profile.streakDates||[];
@@ -831,7 +857,7 @@ function renderAICoach(){
   const cs=profile.currentStreak||0;
   const bs=profile.bestStreak||0;
   const dates=profile.streakDates||[];
-  const today=getTodayKey();
+  const today=todayIST();
   const todayDone=dates.includes(today);
   const last7=[];
   for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);last7.push({key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),day:['S','M','T','W','T','F','S'][d.getDay()]});}
