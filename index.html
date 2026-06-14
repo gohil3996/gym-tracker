@@ -8,24 +8,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#f0f4ff;
-  --bg2:#e8edf8;
-  --surface:rgba(255,255,255,0.7);
-  --surface2:rgba(255,255,255,0.5);
-  --border:rgba(255,255,255,0.9);
-  --border2:rgba(200,210,240,0.5);
-  --text:#0f1729;
-  --text2:#4a5578;
-  --text3:#8892b0;
-  --accent:#4f6ef7;
-  --accent2:#7c3aed;
-  --accent3:#06b6d4;
-  --green:#10b981;
-  --red:#ef4444;
-  --amber:#f59e0b;
-  --shadow:0 8px 32px rgba(79,110,247,0.12);
-  --shadow2:0 4px 16px rgba(0,0,0,0.08);
-  --blur:blur(20px);
+  --accent:#378ADD;
+  --text:#f0f0f0;
+  --text2:#888;
+  --text3:#555;
+  --bg:#0a0a0f;
+  --surface:#0f0f0f;
+  --border:#1a1a1a;
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
   background-image:
@@ -470,17 +459,121 @@ function changeMonth(dir){const[y,m]=viewMonth.split('-').map(Number);viewMonth=
 function setNav(n){curNav=n;['workout','progress','history','profile','diet','weight','coach'].forEach(v=>{document.getElementById('v'+v.charAt(0).toUpperCase()+v.slice(1)).style.display=v===n?'block':'none';const b=document.getElementById('bn_'+v);if(b)b.classList.toggle('active',v===n);});renderTopNav();if(n==='progress')renderProgress();if(n==='history')renderHistory();if(n==='profile')renderProfile();if(n==='diet')renderDietView('vDiet',profile);if(n==='weight')renderWeightGraph();if(n==='coach')renderAICoach();}
 function renderTopNav(){document.getElementById('topNav').innerHTML=['workout','progress','history','diet','weight','coach','profile'].map(n=>`<button class="tnav-btn${curNav===n?' active':''}" onclick="setNav('${n}')">${{workout:'🏋️ Workout',progress:'📊 Progress',history:'📅 History',diet:'🥗 Diet',weight:'⚖️ Weight',coach:'🤖 Coach',profile:'👤 Profile'}[n]}</button>`).join('');}
 function updateStats(){const plan=curPlan(),done=gDone(viewMonth);let sets=0,days=0,streak=0;plan.days.forEach((d,i)=>{const a=d.exercises.every((_,j)=>done[i+'-'+j]);if(a){days++;streak++;}d.exercises.forEach((ex,j)=>{if(done[i+'-'+j])sets+=ex.sets;});});document.getElementById('statsGrid').innerHTML=`<div class="stat-card" style="background:rgba(24,95,165,.12);border:0.5px solid rgba(24,95,165,.2)"><div class="stat-lbl" style="color:var(--accent)">Sets Done</div><div class="stat-val" style="color:var(--accent)">${sets}</div><div class="stat-sub" style="color:var(--accent)">${mlbl(viewMonth)}</div></div><div class="stat-card" style="background:rgba(59,109,17,.12);border:0.5px solid rgba(59,109,17,.2)"><div class="stat-lbl" style="color:#3B6D11">Days Done</div><div class="stat-val" style="color:#3B6D11">${days}/${plan.days.length}</div><div class="stat-sub" style="color:#3B6D11">completed</div></div><div class="stat-card" style="background:rgba(220,53,69,.1);border:0.5px solid rgba(220,53,69,.2)"><div class="stat-lbl" style="color:var(--red)">Protein</div><div class="stat-val" style="color:var(--red)">${profile.protein||calcCals().protein}g</div><div class="stat-sub" style="color:var(--red)">daily target</div></div><div class="stat-card" style="background:rgba(83,74,183,.12);border:0.5px solid rgba(83,74,183,.2)"><div class="stat-lbl" style="color:#534AB7">Streak</div><div class="stat-val" style="color:#534AB7">${streak}d</div><div class="stat-sub" style="color:#534AB7">this month</div></div>`;}
-function renderDayScroll(){const plan=curPlan(),done=gDone(viewMonth);const c=document.getElementById('dayScroll');c.innerHTML='';plan.days.forEach((d,i)=>{const allDone=d.exercises.every((_,j)=>done[i+'-'+j]);const el=document.createElement('div');el.className='day-chip'+(i===curDay?' active':'');el.style.borderColor=i===curDay?(d.sc||'#378ADD'):'#1e1e1e';el.innerHTML=(allDone?'<div class="done-dot"></div>':'')+`<div class="dnum" style="color:${d.sc}">${i+1}</div><div class="dlbl" style="color:${i===curDay?'#f0f0f0':'#555'}">${d.label}</div>`;el.onclick=()=>{curDay=i;renderDayScroll();renderDayPanel();};c.appendChild(el);});}
+function renderDayScroll(){
+  const plan=curPlan(),done=gDone(viewMonth);
+  const c=document.getElementById('dayScroll');
+  c.innerHTML='';
+  const today=todayIST();
+  const totalDays=plan.days.length;
+
+  // Show all days of the month, mapped cyclically to plan days
+  const dim=daysInMonth(viewMonth);
+  for(let i=0;i<dim;i++){
+    const dateKey=dayDateKey(viewMonth,i); // "2026-06-13"
+    const planDayIdx=i%totalDays;          // which workout day (cycles)
+    const d=plan.days[planDayIdx];
+    const isToday=dateKey===today;
+    const isActive=i===curDay;
+    const dayStr=shortDate(dateKey);       // "13 Jun"
+    const dowStr=dayOfWeekShort(dateKey);  // "Sat"
+    const dateNum=i+1;                     // day of month
+
+    // Done = all exercises done for this date
+    const allDone=d.exercises.every((_,j)=>done[dateKey+'-'+j]);
+
+    const el=document.createElement('div');
+    el.className='day-chip'+(isActive?' active':'');
+
+    // Border: today=accent, active=plan color, done=green, else default
+    let borderColor='rgba(200,210,240,0.4)';
+    if(isActive) borderColor=d.sc||'var(--accent)';
+    if(isToday&&!isActive) borderColor='var(--accent)';
+    el.style.borderColor=borderColor;
+
+    // Today ring
+    if(isToday){el.style.boxShadow='0 0 0 2px rgba(79,110,247,0.25)';}
+
+    el.innerHTML=
+      (allDone?'<div class="done-dot"></div>':'')+
+      (isToday?`<div style="font-size:8px;font-weight:900;color:var(--accent);letter-spacing:.05em;margin-bottom:1px">TODAY</div>`:`<div class="dnum" style="color:${d.sc}">${dowStr}</div>`)+
+      `<div style="font-size:13px;font-weight:900;color:${isActive?'var(--text)':'var(--text2)'};">${parseInt(dateKey.split('-')[2])}</div>`+
+      `<div class="dlbl" style="font-size:9px;color:${isActive?d.sc:'var(--text3)'};margin-top:1px">${d.label.split('\n')[0]}</div>`;
+
+    el.onclick=(()=>{
+      const idx=i;
+      return()=>{curDay=idx;renderDayScroll();renderDayPanel();};
+    })();
+    c.appendChild(el);
+  }
+
+  // Scroll to today's date chip
+  setTimeout(()=>{
+    const chips=c.querySelectorAll('.day-chip');
+    const todayObj=indiaDate();
+    const todayDate=todayObj.getDate();
+    const [y,m]=viewMonth.split('-').map(Number);
+    const isCurrentMonth=(viewMonth===mk());
+    // Scroll to today if current month, else scroll to curDay
+    const targetIdx=isCurrentMonth?todayDate-1:curDay;
+    if(chips[targetIdx])chips[targetIdx].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  },80);
+}
 function renderDayPanel(){
-  const plan=curPlan(),d=plan.days[curDay],done=gDone(viewMonth),wts=gWts(viewMonth);
-  const dc=d.exercises.filter((_,j)=>done[curDay+'-'+j]).length,pct=Math.round((dc/d.exercises.length)*100);
-  let html=`<div class="panel"><div class="day-hdr" style="background:${d.bg}"><div class="day-hdr-bg" style="background:${d.hbg}"></div><span class="day-tag" style="background:${d.hbg};color:${d.sc}">${d.tag}</span><div class="day-name" style="color:${d.tc}">Day ${curDay+1} — ${d.label.replace('\n',' ')}</div><div class="day-meta" style="color:${d.sc}">${d.exercises.length} exercises · ${d.exercises.reduce((a,e)=>a+e.sets,0)} sets · ${mlbl(viewMonth)}</div><div class="muscle-row">${d.muscles.map(m=>`<span class="mpill" style="background:${d.hbg};color:${d.sc}">${m}</span>`).join('')}</div></div><div class="prog-wrap"><div class="prog-top"><span>Session progress</span><strong>${dc}/${d.exercises.length} · ${pct}%</strong></div><div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${pct===100?'#639922':d.sc}"></div></div></div>`;
+  const plan=curPlan();
+  const done=gDone(viewMonth),wts=gWts(viewMonth);
+  const planDayIdx=curDay%plan.days.length;
+  const d=plan.days[planDayIdx];
+  // Date-based key: "2026-06-13-0", "2026-06-13-1" etc.
+  const dateKey=dayDateKey(viewMonth,curDay);
+  const today=todayIST();
+  const isToday=dateKey===today;
+  const[y,mo,dy]=dateKey.split('-').map(Number);
+  const fullDate=new Date(y,mo-1,dy).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  const dc=d.exercises.filter((_,j)=>done[dateKey+'-'+j]).length;
+  const pct=Math.round((dc/d.exercises.length)*100);
+
+  let html=`<div class="panel">
+    <div class="day-hdr" style="background:${d.bg}">
+      <div class="day-hdr-bg" style="background:${d.hbg}"></div>
+      ${isToday?`<div style="display:inline-block;font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;background:rgba(79,110,247,0.15);color:var(--accent);letter-spacing:.06em;margin-bottom:4px">📅 TODAY</div><br/>`:''}
+      <span class="day-tag" style="background:${d.hbg};color:${d.sc}">${d.tag}</span>
+      <div class="day-name" style="color:${d.tc}">${d.label.replace('\n',' ')}</div>
+      <div class="day-meta" style="color:${d.sc}">${d.exercises.length} exercises · ${d.exercises.reduce((a,e)=>a+e.sets,0)} sets · ${fullDate}</div>
+      <div class="muscle-row">${d.muscles.map(m=>`<span class="mpill" style="background:${d.hbg};color:${d.sc}">${m}</span>`).join('')}</div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-top"><span>Session progress</span><strong>${dc}/${d.exercises.length} · ${pct}%</strong></div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${pct===100?'#639922':d.sc}"></div></div>
+    </div>`;
+
   d.exercises.forEach((ex,j)=>{
-    const key=curDay+'-'+j,wKey='w-'+key,isDone=!!done[key],wVal=wts[wKey]||'';
+    const key=dateKey+'-'+j,wKey='w-'+key,isDone=!!done[key],wVal=wts[wKey]||'';
     const info=getExInfo(ex.name);
-    html+=`<div class="ex-card${isDone?' done-card':''}"><div class="ex-top"><div class="ex-num" style="background:${d.bg};color:${d.sc}">${j+1}</div><div class="ex-info"${info?` onclick="openSheet('${ex.name.replace(/'/g,"\\'")}')"`:' style="cursor:default"'}><div class="ex-name">${ex.name}${info?'<span style="font-size:11px;color:var(--accent)">ℹ️</span>':''}</div><div class="ex-load">${ex.load}</div></div><button class="ex-chk${isDone?' done':''}" onclick="toggleEx('${key}')">${isDone?'✓':'○'}</button></div><div class="ex-stats-row"><div class="ex-stat"><div class="ex-stat-lbl">Sets</div><div class="ex-stat-val">${ex.sets}</div></div><div class="ex-stat"><div class="ex-stat-lbl">Reps</div><div class="ex-stat-val">${ex.reps}</div></div><div class="ex-stat"><div class="ex-stat-lbl">Your kg</div><div class="ex-stat-val"><input class="kg-inp" type="number" placeholder="—" value="${wVal}" onchange="saveKg('${wKey}',this.value)"/></div></div></div><div class="ex-tip-row">💡 ${ex.tip}</div><div class="ex-acts"><button class="ea-btn" onclick="openEditEx(${curDay},${j})">✏️ Edit</button><button class="ea-del" onclick="deleteEx(${curDay},${j})">🗑</button></div></div>`;
+    html+=`<div class="ex-card${isDone?' done-card':''}">
+      <div class="ex-top">
+        <div class="ex-num" style="background:${d.bg};color:${d.sc}">${j+1}</div>
+        <div class="ex-info"${info?` onclick="openSheet('${ex.name.replace(/'/g,"\\'")}')"`:' style="cursor:default"'}>
+          <div class="ex-name">${ex.name}${info?'<span style="font-size:11px;color:var(--accent)">ℹ️</span>':''}</div>
+          <div class="ex-load">${ex.load}</div>
+        </div>
+        <button class="ex-chk${isDone?' done':''}" onclick="toggleEx('${key}')">${isDone?'✓':'○'}</button>
+      </div>
+      <div class="ex-stats-row">
+        <div class="ex-stat"><div class="ex-stat-lbl">Sets</div><div class="ex-stat-val">${ex.sets}</div></div>
+        <div class="ex-stat"><div class="ex-stat-lbl">Reps</div><div class="ex-stat-val">${ex.reps}</div></div>
+        <div class="ex-stat"><div class="ex-stat-lbl">Your kg</div><div class="ex-stat-val"><input class="kg-inp" type="number" placeholder="—" value="${wVal}" onchange="saveKg('${wKey}',this.value)"/></div></div>
+      </div>
+      <div class="ex-tip-row">💡 ${ex.tip}</div>
+      <div class="ex-acts">
+        <button class="ea-btn" onclick="openEditEx(${planDayIdx},${j})">✏️ Edit</button>
+        <button class="ea-del" onclick="deleteEx(${planDayIdx},${j})">🗑</button>
+      </div>
+    </div>`;
   });
-  html+=`<button class="add-ex-btn" onclick="openAddEx(${curDay})">+ Add Exercise</button><div class="day-tip-box" style="background:${d.bg}"><span style="font-size:15px;flex-shrink:0">ℹ️</span><span style="font-size:12px;color:${d.sc};line-height:1.6">${d.tip}</span></div></div>`;
+  html+=`<button class="add-ex-btn" onclick="openAddEx(${planDayIdx})">+ Add Exercise</button>
+    <div class="day-tip-box" style="background:${d.bg}"><span style="font-size:15px;flex-shrink:0">ℹ️</span><span style="font-size:12px;color:${d.sc};line-height:1.6">${d.tip}</span></div>
+  </div>`;
   document.getElementById('dayPanel').innerHTML=html;
 }
 function toggleEx(key){const m=viewMonth;if(!monthData[m])monthData[m]={done:{},weights:{}};monthData[m].done[key]=!monthData[m].done[key];updateStreakData();sched();renderDayScroll();renderDayPanel();updateStats();}
