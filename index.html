@@ -691,13 +691,40 @@ async function handleAuth(){
   const btn=document.getElementById('aBtn');btn.disabled=true;btn.textContent='Please wait...';
   try{
     const ep=authMode==='signup'?`${AU}:signUp?key=${API_KEY}`:`${AU}:signInWithPassword?key=${API_KEY}`;
-    const res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,returnSecureToken:true})});
-    const data=await res.json();
-    if(data.error){const msgs={'EMAIL_EXISTS':'This email is already registered.','INVALID_LOGIN_CREDENTIALS':'Incorrect email or password.','WEAK_PASSWORD : Password should be at least 6 characters':'Password must be 6 or more characters.','INVALID_EMAIL':'Please enter a valid email.'};showAErr(msgs[data.error.message]||data.error.message);}
-    else{session={token:data.idToken,uid:data.localId,email:data.email};localStorage.setItem('gym_s',JSON.stringify(session));await loadData();if(!profile.email)profile.email=data.email;await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');toast('Welcome back, '+profile.name+'!');}}
+    let res,data;
+    try{
+      res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,returnSecureToken:true})});
+      data=await res.json();
+    }catch(netErr){
+      showAErr('No internet. Please check your connection.');
+      btn.disabled=false;btn.textContent=authMode==='login'?'Log In →':'Create Account →';
+      return;
+    }
+    if(data.error){
+      const code=data.error.message||'';
+      const msgs={
+        'EMAIL_EXISTS':'This email is already registered. Please Log In.',
+        'INVALID_LOGIN_CREDENTIALS':'Wrong email or password. Please try again.',
+        'INVALID_PASSWORD':'Wrong password. Please try again.',
+        'EMAIL_NOT_FOUND':'No account found. Please Sign Up first.',
+        'USER_DISABLED':'This account has been disabled.',
+        'TOO_MANY_ATTEMPTS_TRY_LATER':'Too many attempts. Please try after some time.',
+        'WEAK_PASSWORD : Password should be at least 6 characters':'Password must be at least 6 characters.',
+        'INVALID_EMAIL':'Please enter a valid email address.',
+        'MISSING_PASSWORD':'Please enter your password.',
+      };
+      showAErr(msgs[code]||('Error: '+code));
+    }else{
+      session={token:data.idToken,uid:data.localId,email:data.email};
+      localStorage.setItem('gym_s',JSON.stringify(session));
+      await loadData();
+      if(!profile.email)profile.email=data.email;
+      await loadAdminExercises(session.token);
+      if(!profile.level){buildOb();showScr('sOnboard');}
+      else{initApp();showScr('sMain');toast('Welcome back, '+profile.name+'!');}
+    }
   }catch(e){
-    console.error('Auth error:',e);
-    showAErr('Connection failed. Please check internet and try again.');
+    showAErr('Something went wrong: '+(e.message||e));
   }
   btn.disabled=false;btn.textContent=authMode==='login'?'Log In →':'Create Account →';
 }
@@ -1365,7 +1392,22 @@ function renderAICoach(){
   </div>`;
 }
 
-window.onload=async()=>{switchTab('signup');const sv=localStorage.getItem('gym_s');if(sv){try{session=JSON.parse(sv);await loadData();await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');}}catch(_){localStorage.removeItem('gym_s');}}};
+window.onload=async()=>{
+  switchTab('login');
+  const sv=localStorage.getItem('gym_s');
+  if(sv){
+    try{
+      session=JSON.parse(sv);
+      await loadData();
+      await loadAdminExercises(session.token);
+      if(!profile.level){buildOb();showScr('sOnboard');}
+      else{initApp();showScr('sMain');}
+    }catch(_){
+      localStorage.removeItem('gym_s');
+      session=null;
+    }
+  }
+};
 </script>
 </body>
 </html>
