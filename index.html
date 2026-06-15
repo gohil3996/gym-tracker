@@ -695,13 +695,34 @@ async function handleAuth(){
     const data=await res.json();
     if(data.error){const msgs={'EMAIL_EXISTS':'This email is already registered.','INVALID_LOGIN_CREDENTIALS':'Incorrect email or password.','WEAK_PASSWORD : Password should be at least 6 characters':'Password must be 6 or more characters.','INVALID_EMAIL':'Please enter a valid email.'};showAErr(msgs[data.error.message]||data.error.message);}
     else{session={token:data.idToken,uid:data.localId,email:data.email};localStorage.setItem('gym_s',JSON.stringify(session));await loadData();if(!profile.email)profile.email=data.email;await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');toast('Welcome back, '+profile.name+'!');}}
-  }catch(e){showAErr('Network error. Check your connection.');}
+  }catch(e){
+    console.error('Auth error:',e);
+    showAErr('Connection failed. Please check internet and try again.');
+  }
   btn.disabled=false;btn.textContent=authMode==='login'?'Log In →':'Create Account →';
 }
 function showAErr(m){const e=document.getElementById('aErr');e.textContent='⚠️ '+m;e.style.display='block';}
 async function fbG(p){try{const r=await fetch(`${DB}/users/${session.uid}/${p}.json?auth=${session.token}`);return r.json();}catch(_){return null;}}
 async function fbS(p,d){try{await fetch(`${DB}/users/${session.uid}/${p}.json?auth=${session.token}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(_){}}
 async function loadData(){try{const pr=await fbG('profile');if(pr?.level)Object.assign(profile,pr);const cd=await fbG('customDays');if(cd)customDays=cd;const md=await fbG('monthData');if(md)monthData=md;}catch(_){}}
+
+let _adminExercises={};
+async function loadAdminExercises(token){
+  try{
+    const r=await fetch(`${DB}/adminExercises.json?auth=${token}`);
+    const d=await r.json();
+    if(d&&typeof d==='object') _adminExercises=d;
+  }catch(_){_adminExercises={};}
+}
+function getExInfo(name){
+  const key=(name||'').toLowerCase().trim();
+  // Check admin exercises first (from Firebase)
+  const adminEntry=Object.values(_adminExercises).find(e=>e&&e.name&&e.name.toLowerCase()===key);
+  if(adminEntry) return adminEntry;
+  // Fallback to local EX_INFO from data.js
+  if(typeof EX_INFO!=='undefined'&&EX_INFO[key]) return EX_INFO[key];
+  return null;
+}
 function sched(){document.getElementById('hSub').textContent='☁️ Saving...';if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await fbS('profile',profile);await fbS('customDays',customDays||null);await fbS('monthData',monthData);document.getElementById('hSub').textContent='☁️ Hi, '+profile.name;toast('Saved ☁️','ok');}catch(_){toast('Save failed ⚠️','err');}},900);}
 function buildOb(){
   document.getElementById('levelCards').innerHTML=LEVELS.map(l=>`<div class="level-card" id="lc_${l.id}" onclick="selLvl('${l.id}')"><div class="lc-icon">${l.icon}</div><div><div class="lc-name">${l.name}</div><div class="lc-desc">${l.desc}</div></div><div class="lc-check" id="lchk_${l.id}">✓</div></div>`).join('');
