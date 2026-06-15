@@ -5,60 +5,90 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>GymPro Admin</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,sans-serif;background:#050508;color:#f0f0f0;min-height:100vh}
+:root{
+  --bg:#f0f4ff;
+  --bg2:#e8edf8;
+  --surface:rgba(255,255,255,0.7);
+  --border:rgba(255,255,255,0.9);
+  --border2:rgba(200,210,240,0.5);
+  --text:#0f1729;
+  --text2:#4a5578;
+  --text3:#8892b0;
+  --accent:#4f6ef7;
+  --accent2:#7c3aed;
+  --green:#10b981;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --shadow2:0 4px 16px rgba(0,0,0,0.08);
+  --blur:blur(20px);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 20%,rgba(124,58,237,0.08) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 80%,rgba(79,110,247,0.1) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 50%,rgba(6,182,212,0.05) 0%,transparent 70%);
+  background-attachment:fixed;
+}
 .wrap{max-width:960px;margin:0 auto;padding:20px 16px 60px}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);border-radius:20px;padding:8px 20px;font-size:12px;z-index:9999;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none}
-.toast.show{opacity:1}.toast.ok{background:#0d1f0d;border:1px solid #1a4a1a;color:#7ed87e}.toast.err{background:#2a1a0a;border:1px solid #5a3a0a;color:#e0a060}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);border-radius:20px;padding:9px 22px;font-size:12px;font-weight:600;z-index:9999;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.toast.show{opacity:1}
+.toast.ok{background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#065f46;box-shadow:0 4px 20px rgba(16,185,129,0.15)}
+.toast.err{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);color:#991b1b}
 /* AUTH */
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.abox{width:100%;max-width:340px;text-align:center}
-.inp{width:100%;padding:12px 15px;border-radius:12px;border:1px solid #1e1e1e;background:#111;color:#f0f0f0;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;display:block}
-.inp:focus{border-color:#378ADD}.inp::placeholder{color:#333}
-.btn{width:100%;padding:13px;border-radius:12px;border:none;background:#185FA5;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
-.btn:disabled{background:#1a1a2a;color:#444;cursor:not-allowed}
-.err-box{background:#1a0808;border:1px solid #3a1515;border-radius:10px;padding:10px;font-size:12px;color:#e07070;margin-bottom:10px;display:none;text-align:left}
+.abox{width:100%;max-width:360px;text-align:center;background:rgba(255,255,255,0.65);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:28px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(79,110,247,0.15),0 1px 0 rgba(255,255,255,0.9) inset;padding:32px 28px}
+.inp{width:100%;padding:13px 16px;border-radius:14px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.8);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;margin-bottom:10px;display:block;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.inp:focus{border-color:var(--accent);background:white;box-shadow:0 0 0 4px rgba(79,110,247,0.1)}
+.inp::placeholder{color:var(--text3)}
+.btn{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;box-shadow:0 8px 24px rgba(79,110,247,0.35);transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(79,110,247,0.45)}
+.btn:disabled{background:linear-gradient(135deg,#cbd5e1,#94a3b8);box-shadow:none;cursor:not-allowed;transform:none}
+.err-box{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:11px 14px;font-size:13px;font-weight:500;color:#dc2626;margin-bottom:12px;display:none;text-align:left}
 /* LAYOUT */
-.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #1a1a1a}
-.hdr-title{font-size:18px;font-weight:800;color:#f0f0f0}
-.hdr-sub{font-size:11px;color:#444;margin-top:2px}
-.out-btn{padding:7px 14px;border-radius:9px;border:1px solid #222;background:transparent;color:#555;font-size:12px;cursor:pointer;font-family:inherit}
-.tabs{display:flex;gap:5px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border2)}
+.hdr-title{font-size:20px;font-weight:900;color:var(--text);background:linear-gradient(135deg,#0f1729,#4f6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr-sub{font-size:11px;color:var(--text3);margin-top:3px;font-weight:600}
+.out-btn{padding:8px 16px;border-radius:12px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.6);color:var(--text3);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .2s}
+.out-btn:hover{background:rgba(255,255,255,0.9)}
+.tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid #1a1a1a;background:transparent;color:#555;cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;white-space:nowrap;transition:all .15s}
-.tab.active{background:#185FA5;border-color:#185FA5;color:#fff}
+.tab{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.6);color:var(--text3);cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;font-weight:700;white-space:nowrap;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(79,110,247,0.3)}
 /* CARDS */
-.card{background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:12px;padding:16px;margin-bottom:12px}
-.card-hdr{font-size:13px;font-weight:700;color:#f0f0f0;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.card{background:rgba(255,255,255,0.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow2)}
+.card-hdr{font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 /* STATS */
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
-.sc{background:#0f0f0f;border-radius:12px;padding:13px;border:0.5px solid #1a1a1a;text-align:center}
-.sc-val{font-size:24px;font-weight:800;margin-bottom:2px}
-.sc-lbl{font-size:10px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.sc{background:rgba(255,255,255,0.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:18px;padding:14px;border:1px solid var(--border);text-align:center;box-shadow:var(--shadow2)}
+.sc-val{font-size:24px;font-weight:900;margin-bottom:3px}
+.sc-lbl{font-size:10px;color:var(--text3);font-weight:800;text-transform:uppercase;letter-spacing:.07em}
 /* TABLE */
 .tbl{width:100%;border-collapse:collapse;font-size:12px}
-.tbl th{text-align:left;padding:7px 10px;color:#555;font-weight:700;border-bottom:1px solid #1a1a1a;font-size:11px;text-transform:uppercase}
-.tbl td{padding:7px 10px;border-bottom:0.5px solid #111;color:#ccc;vertical-align:middle}
-.tbl tr:hover td{background:#111}
-.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
-.ebtn{padding:4px 10px;border-radius:7px;border:0.5px solid #1a3050;background:#0a1525;color:#378ADD;font-size:11px;cursor:pointer;font-family:inherit}
-.dbtn{padding:4px 10px;border-radius:7px;border:0.5px solid #2a1515;background:#150a0a;color:#e05555;font-size:11px;cursor:pointer;font-family:inherit}
-.sbtn{padding:8px 16px;border-radius:9px;border:none;background:#185FA5;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.tbl th{text-align:left;padding:9px 10px;color:var(--text3);font-weight:800;border-bottom:1.5px solid var(--border2);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(200,210,240,0.3);color:var(--text2);vertical-align:middle;font-weight:500}
+.tbl tr:hover td{background:rgba(79,110,247,0.04)}
+.badge{display:inline-block;font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700}
+.ebtn{padding:5px 12px;border-radius:9px;border:1.5px solid rgba(79,110,247,0.2);background:rgba(79,110,247,0.06);color:var(--accent);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700}
+.dbtn{padding:5px 12px;border-radius:9px;border:1.5px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.06);color:var(--red);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700}
+.sbtn{padding:9px 18px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;box-shadow:0 6px 20px rgba(79,110,247,0.3)}
 /* FORM */
-.fl{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-.mi{width:100%;padding:9px 12px;border-radius:9px;border:1px solid #1e1e1e;background:#161616;color:#f0f0f0;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px}
-.mi:focus{border-color:#378ADD}.mi::placeholder{color:#333}
+.fl{font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.mi{width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid var(--border2);background:rgba(255,255,255,0.8);color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:9px;transition:all .2s}
+.mi:focus{border-color:var(--accent);background:white;box-shadow:0 0 0 3px rgba(79,110,247,0.1)}
+.mi::placeholder{color:var(--text3)}
 textarea.mi{resize:vertical;min-height:65px}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 /* MODAL */
-.mov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.mov{position:fixed;inset:0;background:rgba(15,23,42,0.4);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
 .mov.show{display:flex}
-.modal{background:#0f0f12;border-radius:14px;padding:18px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
-.mtitle{font-size:15px;font-weight:700;color:#f0f0f0;margin-bottom:14px}
-.mfoot{display:flex;gap:8px;margin-top:12px}
-.mcbtn{flex:1;padding:10px;border-radius:9px;border:1px solid #222;background:transparent;color:#555;font-size:13px;cursor:pointer;font-family:inherit}
-.info-box{background:#0a1525;border:0.5px solid #185FA5;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#378ADD;line-height:1.6}
-.empty{text-align:center;color:#333;padding:24px;font-size:13px}
+.modal{background:rgba(255,255,255,0.92);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:24px;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 20px 60px rgba(79,110,247,0.15)}
+.mtitle{font-size:16px;font-weight:900;color:var(--text);margin-bottom:14px}
+.mfoot{display:flex;gap:9px;margin-top:12px}
+.mcbtn{flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border2);background:transparent;color:var(--text3);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700}
+.info-box{background:rgba(79,110,247,0.06);border:1px solid rgba(79,110,247,0.2);border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--accent);line-height:1.7;font-weight:600}
+.empty{text-align:center;color:var(--text3);padding:24px;font-size:13px;font-weight:600}
 </style>
 </head>
 <body>
@@ -68,8 +98,8 @@ textarea.mi{resize:vertical;min-height:65px}
 <div id="sAuth">
 <div class="auth-wrap"><div class="abox">
   <div style="font-size:44px;margin-bottom:10px">🔐</div>
-  <div style="font-size:22px;font-weight:800;color:#f0f0f0;margin-bottom:4px">GymPro Admin</div>
-  <div style="font-size:13px;color:#444;margin-bottom:22px">Authorized access only</div>
+  <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px">GymPro Admin</div>
+  <div style="font-size:13px;color:var(--text3);margin-bottom:22px">Authorized access only</div>
   <input class="inp" id="aEmail" type="email" placeholder="Admin email"/>
   <input class="inp" id="aPass" type="password" placeholder="Password"/>
   <div class="err-box" id="aErr"></div>
@@ -109,7 +139,7 @@ textarea.mi{resize:vertical;min-height:65px}
   <input class="mi" id="emM" placeholder="e.g. Chest, Front Delts, Triceps"/>
   <div class="fl">GIF URL</div>
   <input class="mi" id="emG" placeholder="https://media.giphy.com/..."/>
-  <div style="font-size:11px;color:#378ADD;margin-bottom:8px">→ giphy.com → search exercise → right-click GIF → Copy image address</div>
+  <div style="font-size:11px;color:var(--accent);margin-bottom:8px">→ giphy.com → search exercise → right-click GIF → Copy image address</div>
   <div class="fl">Why this exercise?</div>
   <textarea class="mi" id="emW" placeholder="Explain the benefit and science behind it..."></textarea>
   <div class="fl">How to perform (one step per line)</div>
@@ -132,7 +162,7 @@ textarea.mi{resize:vertical;min-height:65px}
   <div class="frow">
     <div><div class="fl">Icon (emoji)</div><input class="mi" id="pmI" placeholder="⚡"/></div>
     <div><div class="fl">Goal</div>
-      <select class="mi" id="pmG" style="color:#f0f0f0">
+      <select class="mi" id="pmG" style="color:var(--text)">
         <option value="muscle">Muscle Gain</option>
         <option value="fat_loss">Fat Loss</option>
         <option value="strength">Strength</option>
@@ -144,7 +174,7 @@ textarea.mi{resize:vertical;min-height:65px}
   <div class="frow">
     <div><div class="fl">Days/week</div><input class="mi" id="pmD" type="number" placeholder="6"/></div>
     <div><div class="fl">Level</div>
-      <select class="mi" id="pmL" style="color:#f0f0f0">
+      <select class="mi" id="pmL" style="color:var(--text)">
         <option value="all">All Levels</option>
         <option value="beginner">Beginner</option>
         <option value="intermediate">Intermediate</option>
@@ -209,7 +239,7 @@ let U={},EX={},PL={};
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 const $=id=>document.getElementById(id);
 function toast(m,t){const el=$('toast');el.textContent=m;el.className='toast show '+(t||'ok');setTimeout(()=>el.className='toast',2500);}
-function loading(){$('content').innerHTML='<div style="text-align:center;padding:40px;color:#333;font-size:14px">⏳ Loading...</div>';}
+function loading(){$('content').innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);font-size:14px">⏳ Loading...</div>';}
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function login(){
@@ -281,29 +311,29 @@ function renderOverview(){
   const planRows=Object.entries(pc).sort((a,b)=>b[1]-a[1]).map(([id,c])=>{
     const pct=Math.round(c/uids.length*100)||0;
     return`<tr>
-      <td style="font-weight:600;color:#f0f0f0">${PNAMES[id]||id}</td>
+      <td style="font-weight:600;color:var(--text)">${PNAMES[id]||id}</td>
       <td><div style="display:flex;align-items:center;gap:8px">
-        <div style="flex:1;background:#111;border-radius:4px;height:6px"><div style="width:${pct}%;background:#378ADD;height:6px;border-radius:4px"></div></div>
-        <span style="color:#378ADD;font-size:11px;min-width:20px">${c}</span>
+        <div style="flex:1;background:var(--bg2);border-radius:4px;height:6px"><div style="width:${pct}%;background:var(--accent);height:6px;border-radius:4px"></div></div>
+        <span style="color:var(--accent);font-size:11px;min-width:20px">${c}</span>
       </div></td>
     </tr>`;
   }).join('');
   // Top users by sets
   const topUsers=userStats.sort((a,b)=>b.sets-a.sets).slice(0,5).map(({p,sets,activeDays})=>
     `<tr>
-      <td style="font-weight:600;color:#f0f0f0">${p.name||'—'}</td>
-      <td style="color:#555;font-size:11px">${p.email||'—'}</td>
-      <td><span class="badge" style="background:rgba(24,95,165,.12);color:#378ADD">${PNAMES[p.planId]||p.planId||'—'}</span></td>
-      <td style="color:#3B6D11;font-weight:600">${sets}</td>
-      <td style="color:#854F0B">${activeDays}d</td>
+      <td style="font-weight:600;color:var(--text)">${p.name||'—'}</td>
+      <td style="color:var(--text3);font-size:11px">${p.email||'—'}</td>
+      <td><span class="badge" style="background:rgba(79,110,247,0.1);color:var(--accent)">${PNAMES[p.planId]||p.planId||'—'}</span></td>
+      <td style="color:var(--green);font-weight:600">${sets}</td>
+      <td style="color:var(--amber)">${activeDays}d</td>
     </tr>`
   ).join('');
   $('content').innerHTML=`
   <div class="stat-row">
-    <div class="sc"><div class="sc-val" style="color:#378ADD">${uids.length}</div><div class="sc-lbl">Users</div></div>
-    <div class="sc"><div class="sc-val" style="color:#3B6D11">${totalSets}</div><div class="sc-lbl">Total Sets</div></div>
-    <div class="sc"><div class="sc-val" style="color:#854F0B">${avgSets}</div><div class="sc-lbl">Avg Sets/User</div></div>
-    <div class="sc"><div class="sc-val" style="color:#534AB7">${avgDays}</div><div class="sc-lbl">Avg Days/User</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--accent)">${uids.length}</div><div class="sc-lbl">Users</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--green)">${totalSets}</div><div class="sc-lbl">Total Sets</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--amber)">${avgSets}</div><div class="sc-lbl">Avg Sets/User</div></div>
+    <div class="sc"><div class="sc-val" style="color:var(--accent2)">${avgDays}</div><div class="sc-lbl">Avg Days/User</div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
     <div class="card">
@@ -334,18 +364,18 @@ function renderUsers(){
     const months=Object.keys(md).sort().slice(-3);
     const trend=months.map(mo=>{
       const s=Object.values(md[mo]?.done||{}).filter(Boolean).length;
-      return`<span style="font-size:10px;color:#555">${mo.slice(5)}: <b style="color:#f0f0f0">${s}</b></span>`;
+      return`<span style="font-size:10px;color:var(--text3)">${mo.slice(5)}: <b style="color:var(--text)">${s}</b></span>`;
     }).join(' · ');
     return`<tr>
       <td>
-        <div style="font-weight:600;color:#f0f0f0">${p.name||'—'}</div>
-        <div style="font-size:10px;color:#444">${p.email||uid.slice(0,14)+'...'}</div>
+        <div style="font-weight:600;color:var(--text)">${p.name||'—'}</div>
+        <div style="font-size:10px;color:var(--text3)">${p.email||uid.slice(0,14)+'...'}</div>
       </td>
-      <td><span class="badge" style="background:rgba(24,95,165,.12);color:#378ADD">${PNAMES[p.planId]||p.planId||'—'}</span></td>
-      <td><span class="badge" style="background:rgba(83,74,183,.12);color:#534AB7">${p.level||'—'}</span></td>
-      <td style="color:#aaa">${p.weight?p.weight+' kg':'—'}</td>
-      <td style="color:#3B6D11;font-weight:600">${sets}</td>
-      <td style="color:#854F0B">${activeDays}d</td>
+      <td><span class="badge" style="background:rgba(79,110,247,0.1);color:var(--accent)">${PNAMES[p.planId]||p.planId||'—'}</span></td>
+      <td><span class="badge" style="background:rgba(124,58,237,0.1);color:var(--accent2)">${p.level||'—'}</span></td>
+      <td style="color:var(--text2)">${p.weight?p.weight+' kg':'—'}</td>
+      <td style="color:var(--green);font-weight:600">${sets}</td>
+      <td style="color:var(--amber)">${activeDays}d</td>
       <td style="font-size:10px">${trend||'—'}</td>
       <td style="display:flex;gap:4px">
         <button class="ebtn" onclick="showUserDetail('${uid}')">📊</button>
@@ -355,7 +385,7 @@ function renderUsers(){
   }).join('');
   $('content').innerHTML=`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div style="font-size:13px;color:#555">${uids.length} registered user${uids.length!==1?'s':''}</div>
+    <div style="font-size:13px;color:var(--text3)">${uids.length} registered user${uids.length!==1?'s':''}</div>
     <button class="sbtn" onclick="loadAll().then(renderUsers)">🔄 Refresh</button>
   </div>
   <div class="card">
@@ -385,10 +415,10 @@ function showUserDetail(uid){
     // Bar visual
     const bar=Math.round(days/31*100);
     return`<tr>
-      <td style="color:#f0f0f0;font-weight:600">${mo}</td>
-      <td style="color:#3B6D11">${sets} sets</td>
-      <td style="color:#854F0B">${days} days</td>
-      <td style="width:80px"><div style="background:#111;border-radius:3px;height:5px"><div style="width:${bar}%;background:#378ADD;height:5px;border-radius:3px"></div></div></td>
+      <td style="color:var(--text);font-weight:600">${mo}</td>
+      <td style="color:var(--green)">${sets} sets</td>
+      <td style="color:var(--amber)">${days} days</td>
+      <td style="width:80px"><div style="background:var(--bg2);border-radius:3px;height:5px"><div style="width:${bar}%;background:var(--accent);height:5px;border-radius:3px"></div></div></td>
     </tr>`;
   }).join('');
   // Total stats
@@ -402,20 +432,20 @@ function showUserDetail(uid){
   $('userDetailTitle').textContent=(p.name||'User')+' — Workout Details';
   $('userDetailBody').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
-      <div class="sc" style="margin:0"><div class="sc-val" style="color:#3B6D11;font-size:20px">${total}</div><div class="sc-lbl">Total Sets</div></div>
-      <div class="sc" style="margin:0"><div class="sc-val" style="color:#854F0B;font-size:20px">${totalDays}</div><div class="sc-lbl">Total Days</div></div>
-      <div class="sc" style="margin:0"><div class="sc-val" style="color:#534AB7;font-size:20px">${months.length}</div><div class="sc-lbl">Active Months</div></div>
+      <div class="sc" style="margin:0"><div class="sc-val" style="color:var(--green);font-size:20px">${total}</div><div class="sc-lbl">Total Sets</div></div>
+      <div class="sc" style="margin:0"><div class="sc-val" style="color:var(--amber);font-size:20px">${totalDays}</div><div class="sc-lbl">Total Days</div></div>
+      <div class="sc" style="margin:0"><div class="sc-val" style="color:var(--accent2);font-size:20px">${months.length}</div><div class="sc-lbl">Active Months</div></div>
     </div>
-    <div style="font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Profile</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Profile</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;font-size:12px">
-      <div style="color:#555">Plan: <span style="color:#378ADD">${PNAMES[p.planId]||p.planId||'—'}</span></div>
-      <div style="color:#555">Level: <span style="color:#f0f0f0">${p.level||'—'}</span></div>
-      <div style="color:#555">Weight: <span style="color:#f0f0f0">${p.weight?p.weight+' kg':'—'}</span></div>
-      <div style="color:#555">Age: <span style="color:#f0f0f0">${p.age||'—'}</span></div>
-      <div style="color:#555">Height: <span style="color:#f0f0f0">${p.height?p.height+' cm':'—'}</span></div>
-      <div style="color:#555">Gender: <span style="color:#f0f0f0">${p.gender||'—'}</span></div>
+      <div style="color:var(--text3)">Plan: <span style="color:var(--accent)">${PNAMES[p.planId]||p.planId||'—'}</span></div>
+      <div style="color:var(--text3)">Level: <span style="color:var(--text)">${p.level||'—'}</span></div>
+      <div style="color:var(--text3)">Weight: <span style="color:var(--text)">${p.weight?p.weight+' kg':'—'}</span></div>
+      <div style="color:var(--text3)">Age: <span style="color:var(--text)">${p.age||'—'}</span></div>
+      <div style="color:var(--text3)">Height: <span style="color:var(--text)">${p.height?p.height+' cm':'—'}</span></div>
+      <div style="color:var(--text3)">Gender: <span style="color:var(--text)">${p.gender||'—'}</span></div>
     </div>
-    <div style="font-size:11px;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Monthly Breakdown</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Monthly Breakdown</div>
     ${monthRows?`<table class="tbl"><thead><tr><th>Month</th><th>Sets</th><th>Days</th><th>Activity</th></tr></thead><tbody>${monthRows}</tbody></table>`:'<div class="empty">No workout data yet</div>'}
     <div style="margin-top:12px;text-align:right">
       <button class="ebtn" onclick="openMsg('${uid}','${(p.name||'User').replace(/'/g,"\\'")}')">💬 Message</button>
@@ -430,10 +460,10 @@ function renderExercises(){
   const exs=Object.entries(EX);
   const customRows=exs.map(([id,ex])=>
     `<tr>
-      <td style="font-weight:600;color:#f0f0f0">${ex.name}</td>
-      <td style="color:#555;font-size:11px">${ex.muscles||'—'}</td>
-      <td>${ex.gif?`<a href="${ex.gif}" target="_blank" style="color:#378ADD;font-size:11px">▶ View</a>`:'<span style="color:#333">—</span>'}</td>
-      <td><span class="badge" style="background:rgba(24,95,165,.15);color:#378ADD">Custom</span></td>
+      <td style="font-weight:600;color:var(--text)">${ex.name}</td>
+      <td style="color:var(--text3);font-size:11px">${ex.muscles||'—'}</td>
+      <td>${ex.gif?`<a href="${ex.gif}" target="_blank" style="color:var(--accent);font-size:11px">▶ View</a>`:'<span style="color:var(--text3)">—</span>'}</td>
+      <td><span class="badge" style="background:rgba(79,110,247,0.1);color:var(--accent)">Custom</span></td>
       <td style="display:flex;gap:5px">
         <button class="ebtn" onclick="openEx('${id}')">✏️</button>
         <button class="dbtn" onclick="delEx('${id}')">🗑</button>
@@ -447,28 +477,28 @@ function renderExercises(){
     const overrideId='builtin__'+name.replace(/[^a-z0-9]/g,'_');
     const ov=EX[overrideId];
     return`<tr>
-      <td style="font-weight:600;color:#ccc">${name}${ov?` <span style="color:#7ed87e;font-size:10px">✓ edited</span>`:''}</td>
-      <td style="color:#555;font-size:11px">${(ex.muscles||[]).join(', ')||'—'}</td>
-      <td>${(ov?.gif||ex.gif)?`<a href="${ov?.gif||ex.gif}" target="_blank" style="color:#378ADD;font-size:11px">▶ View</a>`:'<span style="color:#333">—</span>'}</td>
-      <td><span class="badge" style="background:rgba(59,109,17,.15);color:#3B6D11">Built-in</span></td>
+      <td style="font-weight:600;color:var(--text2)">${name}${ov?` <span style="color:var(--green);font-size:10px">✓ edited</span>`:''}</td>
+      <td style="color:var(--text3);font-size:11px">${(ex.muscles||[]).join(', ')||'—'}</td>
+      <td>${(ov?.gif||ex.gif)?`<a href="${ov?.gif||ex.gif}" target="_blank" style="color:var(--accent);font-size:11px">▶ View</a>`:'<span style="color:var(--text3)">—</span>'}</td>
+      <td><span class="badge" style="background:rgba(16,185,129,0.12);color:var(--green)">Built-in</span></td>
       <td><button class="ebtn" onclick="openExBuiltin('${name.replace(/'/g,"\\'")}')">✏️ Edit</button></td>
     </tr>`;
   }).join('');
   $('content').innerHTML=`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
     <div>
-      <div style="font-size:13px;font-weight:700;color:#f0f0f0">Exercise Info Library</div>
-      <div style="font-size:11px;color:#555;margin-top:2px">Edit any exercise to update GIF shown in user app</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text)">Exercise Info Library</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">Edit any exercise to update GIF shown in user app</div>
     </div>
     <button class="sbtn" onclick="openEx()">+ Add New</button>
   </div>
   ${customRows?`<div class="card" style="margin-bottom:10px">
-    <div class="card-hdr" style="font-size:12px;color:#378ADD">⚙️ Custom (${exs.length})</div>
+    <div class="card-hdr" style="font-size:12px;color:var(--accent)">⚙️ Custom (${exs.length})</div>
     <table class="tbl"><thead><tr><th>Name</th><th>Muscles</th><th>GIF</th><th>Type</th><th>Actions</th></tr></thead>
     <tbody>${customRows}</tbody></table>
   </div>`:''}
   <div class="card">
-    <div class="card-hdr" style="font-size:12px;color:#3B6D11">✅ Built-in Exercises (${EX_INFO_KEYS.length}) — click ✏️ to edit GIF</div>
+    <div class="card-hdr" style="font-size:12px;color:var(--green)">✅ Built-in Exercises (${EX_INFO_KEYS.length}) — click ✏️ to edit GIF</div>
     <table class="tbl"><thead><tr><th>Name</th><th>Muscles</th><th>GIF</th><th>Type</th><th>Actions</th></tr></thead>
     <tbody>${builtinRows}</tbody>
   </div>`;
@@ -511,10 +541,10 @@ function renderPlans(){
   const ps=Object.entries(PL);
   const customRows=ps.map(([id,p])=>
     `<tr>
-      <td><span style="font-size:16px;margin-right:6px">${p.icon||'📋'}</span><span style="font-weight:600;color:#f0f0f0">${p.name}</span></td>
-      <td><span class="badge" style="background:rgba(24,95,165,.12);color:#378ADD">${p.goal||'—'}</span></td>
-      <td style="color:#777">${p.level||'all'}</td>
-      <td style="color:#777">${p.days?p.days+'d/wk':'—'}</td>
+      <td><span style="font-size:16px;margin-right:6px">${p.icon||'📋'}</span><span style="font-weight:600;color:var(--text)">${p.name}</span></td>
+      <td><span class="badge" style="background:rgba(79,110,247,0.1);color:var(--accent)">${p.goal||'—'}</span></td>
+      <td style="color:var(--text2)">${p.level||'all'}</td>
+      <td style="color:var(--text2)">${p.days?p.days+'d/wk':'—'}</td>
       <td style="display:flex;gap:5px">
         <button class="ebtn" onclick="openPlan('${id}')">✏️</button>
         <button class="dbtn" onclick="delPlan('${id}')">🗑</button>
@@ -537,28 +567,28 @@ function renderPlans(){
   ];
   const builtinRows=BUILTIN_PLANS.map(p=>
     `<tr>
-      <td><span style="font-size:16px;margin-right:6px">${p.icon}</span><span style="font-weight:600;color:#ccc">${p.name}</span></td>
-      <td><span class="badge" style="background:rgba(24,95,165,.12);color:#378ADD">${p.goal}</span></td>
-      <td style="color:#555">${p.level}</td>
-      <td style="color:#555">${p.days}d/wk</td>
-      <td style="color:#333;font-size:11px">Built-in</td>
+      <td><span style="font-size:16px;margin-right:6px">${p.icon}</span><span style="font-weight:600;color:var(--text2)">${p.name}</span></td>
+      <td><span class="badge" style="background:rgba(79,110,247,0.1);color:var(--accent)">${p.goal}</span></td>
+      <td style="color:var(--text3)">${p.level}</td>
+      <td style="color:var(--text3)">${p.days}d/wk</td>
+      <td style="color:var(--text3);font-size:11px">Built-in</td>
     </tr>`
   ).join('');
   $('content').innerHTML=`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
     <div>
-      <div style="font-size:13px;font-weight:700;color:#f0f0f0">Plans</div>
-      <div style="font-size:11px;color:#555;margin-top:2px">Users see all built-in plans + your custom plans</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text)">Plans</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">Users see all built-in plans + your custom plans</div>
     </div>
     <button class="sbtn" onclick="openPlan()">+ Add Custom Plan</button>
   </div>
   ${customRows?`<div class="card" style="margin-bottom:10px">
-    <div class="card-hdr" style="font-size:12px;color:#378ADD">⚙️ Custom Plans (${ps.length})</div>
+    <div class="card-hdr" style="font-size:12px;color:var(--accent)">⚙️ Custom Plans (${ps.length})</div>
     <table class="tbl"><thead><tr><th>Plan Name</th><th>Goal</th><th>Level</th><th>Days</th><th>Actions</th></tr></thead>
     <tbody>${customRows}</tbody></table>
   </div>`:''}
   <div class="card">
-    <div class="card-hdr" style="font-size:12px;color:#3B6D11">✅ Built-in Plans (12)</div>
+    <div class="card-hdr" style="font-size:12px;color:var(--green)">✅ Built-in Plans (12)</div>
     <table class="tbl"><thead><tr><th>Plan Name</th><th>Goal</th><th>Level</th><th>Days</th><th>Actions</th></tr></thead>
     <tbody>${builtinRows}</tbody></table>
   </div>`;
@@ -589,10 +619,10 @@ function renderMessages(){
   });
   msgs.sort((a,b)=>(b.ts||0)-(a.ts||0));
   const rows=msgs.slice(0,30).map(m=>
-    `<tr><td style="font-weight:600">${m.uname}</td><td style="color:#777;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.text}</td><td style="color:#333;font-size:11px">${new Date(m.ts||0).toLocaleDateString()}</td></tr>`
+    `<tr><td style="font-weight:600">${m.uname}</td><td style="color:var(--text2);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.text}</td><td style="color:var(--text3);font-size:11px">${new Date(m.ts||0).toLocaleDateString()}</td></tr>`
   ).join('');
   $('content').innerHTML=`
-  <div style="font-size:13px;color:#555;margin-bottom:12px">Go to Users tab → 💬 button to message a specific user</div>
+  <div style="font-size:13px;color:var(--text3);margin-bottom:12px">Go to Users tab → 💬 button to message a specific user</div>
   <div class="card">
     <div class="card-hdr">💬 Sent Messages (${msgs.length})</div>
     ${rows?`<table class="tbl"><thead><tr><th>To</th><th>Message</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="empty">No messages sent yet.</div>'}
