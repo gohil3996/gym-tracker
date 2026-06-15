@@ -691,65 +691,17 @@ async function handleAuth(){
   const btn=document.getElementById('aBtn');btn.disabled=true;btn.textContent='Please wait...';
   try{
     const ep=authMode==='signup'?`${AU}:signUp?key=${API_KEY}`:`${AU}:signInWithPassword?key=${API_KEY}`;
-    let res,data;
-    try{
-      res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,returnSecureToken:true})});
-      data=await res.json();
-    }catch(netErr){
-      showAErr('No internet. Please check your connection.');
-      btn.disabled=false;btn.textContent=authMode==='login'?'Log In →':'Create Account →';
-      return;
-    }
-    if(data.error){
-      const code=data.error.message||'';
-      const msgs={
-        'EMAIL_EXISTS':'This email is already registered. Please Log In.',
-        'INVALID_LOGIN_CREDENTIALS':'Wrong email or password. Please try again.',
-        'INVALID_PASSWORD':'Wrong password. Please try again.',
-        'EMAIL_NOT_FOUND':'No account found. Please Sign Up first.',
-        'USER_DISABLED':'This account has been disabled.',
-        'TOO_MANY_ATTEMPTS_TRY_LATER':'Too many attempts. Please try after some time.',
-        'WEAK_PASSWORD : Password should be at least 6 characters':'Password must be at least 6 characters.',
-        'INVALID_EMAIL':'Please enter a valid email address.',
-        'MISSING_PASSWORD':'Please enter your password.',
-      };
-      showAErr(msgs[code]||('Error: '+code));
-    }else{
-      session={token:data.idToken,uid:data.localId,email:data.email};
-      localStorage.setItem('gym_s',JSON.stringify(session));
-      await loadData();
-      if(!profile.email)profile.email=data.email;
-      await loadAdminExercises(session.token);
-      if(!profile.level){buildOb();showScr('sOnboard');}
-      else{initApp();showScr('sMain');toast('Welcome back, '+profile.name+'!');}
-    }
-  }catch(e){
-    showAErr('Something went wrong: '+(e.message||e));
-  }
+    const res=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass,returnSecureToken:true})});
+    const data=await res.json();
+    if(data.error){const msgs={'EMAIL_EXISTS':'This email is already registered.','INVALID_LOGIN_CREDENTIALS':'Incorrect email or password.','WEAK_PASSWORD : Password should be at least 6 characters':'Password must be 6 or more characters.','INVALID_EMAIL':'Please enter a valid email.'};showAErr(msgs[data.error.message]||data.error.message);}
+    else{session={token:data.idToken,uid:data.localId,email:data.email};localStorage.setItem('gym_s',JSON.stringify(session));await loadData();if(!profile.email)profile.email=data.email;await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');toast('Welcome back, '+profile.name+'!');}}
+  }catch(e){showAErr('Network error. Check your connection.');}
   btn.disabled=false;btn.textContent=authMode==='login'?'Log In →':'Create Account →';
 }
 function showAErr(m){const e=document.getElementById('aErr');e.textContent='⚠️ '+m;e.style.display='block';}
 async function fbG(p){try{const r=await fetch(`${DB}/users/${session.uid}/${p}.json?auth=${session.token}`);return r.json();}catch(_){return null;}}
 async function fbS(p,d){try{await fetch(`${DB}/users/${session.uid}/${p}.json?auth=${session.token}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});}catch(_){}}
 async function loadData(){try{const pr=await fbG('profile');if(pr?.level)Object.assign(profile,pr);const cd=await fbG('customDays');if(cd)customDays=cd;const md=await fbG('monthData');if(md)monthData=md;}catch(_){}}
-
-let _adminExercises={};
-async function loadAdminExercises(token){
-  try{
-    const r=await fetch(`${DB}/adminExercises.json?auth=${token}`);
-    const d=await r.json();
-    if(d&&typeof d==='object') _adminExercises=d;
-  }catch(_){_adminExercises={};}
-}
-function getExInfo(name){
-  const key=(name||'').toLowerCase().trim();
-  // Check admin exercises first (from Firebase)
-  const adminEntry=Object.values(_adminExercises).find(e=>e&&e.name&&e.name.toLowerCase()===key);
-  if(adminEntry) return adminEntry;
-  // Fallback to local EX_INFO from data.js
-  if(typeof EX_INFO!=='undefined'&&EX_INFO[key]) return EX_INFO[key];
-  return null;
-}
 function sched(){document.getElementById('hSub').textContent='☁️ Saving...';if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await fbS('profile',profile);await fbS('customDays',customDays||null);await fbS('monthData',monthData);document.getElementById('hSub').textContent='☁️ Hi, '+profile.name;toast('Saved ☁️','ok');}catch(_){toast('Save failed ⚠️','err');}},900);}
 function buildOb(){
   document.getElementById('levelCards').innerHTML=LEVELS.map(l=>`<div class="level-card" id="lc_${l.id}" onclick="selLvl('${l.id}')"><div class="lc-icon">${l.icon}</div><div><div class="lc-name">${l.name}</div><div class="lc-desc">${l.desc}</div></div><div class="lc-check" id="lchk_${l.id}">✓</div></div>`).join('');
@@ -765,27 +717,7 @@ function updateCalCard(){if(!profile.weight){document.getElementById('calCard').
 function changeMonth(dir){const[y,m]=viewMonth.split('-').map(Number);viewMonth=mk(new Date(y,m-1+dir,1));document.getElementById('mLabel').textContent=mlbl(viewMonth);updateStats();renderDayScroll();renderDayPanel();if(curNav==='progress')renderProgress();if(curNav==='history')renderHistory();}
 function setNav(n){curNav=n;['workout','progress','history','profile','diet','weight','coach'].forEach(v=>{document.getElementById('v'+v.charAt(0).toUpperCase()+v.slice(1)).style.display=v===n?'block':'none';const b=document.getElementById('bn_'+v);if(b)b.classList.toggle('active',v===n);});renderTopNav();if(n==='progress')renderProgress();if(n==='history')renderHistory();if(n==='profile')renderProfile();if(n==='diet')renderDietView('vDiet',profile);if(n==='weight')renderWeightGraph();if(n==='coach')renderAICoach();}
 function renderTopNav(){document.getElementById('topNav').innerHTML=['workout','progress','history','diet','weight','coach','profile'].map(n=>`<button class="tnav-btn${curNav===n?' active':''}" onclick="setNav('${n}')">${{workout:'🏋️ Workout',progress:'📊 Progress',history:'📅 History',diet:'🥗 Diet',weight:'⚖️ Weight',coach:'🤖 Coach',profile:'👤 Profile'}[n]}</button>`).join('');}
-function updateStats(){
-  const plan=curPlan(),done=gDone(viewMonth);
-  const dim=daysInMonth(viewMonth);
-  let sets=0,completedDays=0,totalWorkoutDays=0;
-  for(let i=0;i<dim;i++){
-    const dateKey=dayDateKey(viewMonth,i);
-    if(isSunday(dateKey)) continue; // Sunday skip
-    totalWorkoutDays++;
-    const planDayIdx=getWorkoutDayIdx(dateKey);
-    const d=plan.days[planDayIdx];
-    const allDone=d.exercises.every((_,j)=>done[dateKey+'-'+j]);
-    if(allDone) completedDays++;
-    d.exercises.forEach((ex,j)=>{if(done[dateKey+'-'+j])sets+=ex.sets;});
-  }
-  const cs=profile.currentStreak||0;
-  document.getElementById('statsGrid').innerHTML=
-    `<div class="stat-card" style="background:rgba(79,110,247,0.07);border:1.5px solid rgba(79,110,247,0.18)"><div class="stat-lbl" style="color:var(--accent)">Sets Done</div><div class="stat-val" style="color:var(--accent)">${sets}</div><div class="stat-sub" style="color:var(--accent)">${mlbl(viewMonth)}</div></div>
-     <div class="stat-card" style="background:rgba(16,185,129,0.07);border:1.5px solid rgba(16,185,129,0.18)"><div class="stat-lbl" style="color:#3B6D11">Days Done</div><div class="stat-val" style="color:#3B6D11">${completedDays}/${totalWorkoutDays}</div><div class="stat-sub" style="color:#3B6D11">completed</div></div>
-     <div class="stat-card" style="background:rgba(239,68,68,0.07);border:1.5px solid rgba(239,68,68,0.18)"><div class="stat-lbl" style="color:var(--red)">Protein</div><div class="stat-val" style="color:var(--red)">${profile.protein||calcCals().protein}g</div><div class="stat-sub" style="color:var(--red)">daily target</div></div>
-     <div class="stat-card" style="background:rgba(124,58,237,0.07);border:1.5px solid rgba(124,58,237,0.18)"><div class="stat-lbl" style="color:#534AB7">Streak</div><div class="stat-val" style="color:#534AB7">${cs}d</div><div class="stat-sub" style="color:#534AB7">this month</div></div>`;
-}
+function updateStats(){const plan=curPlan(),done=gDone(viewMonth);let sets=0,days=0,streak=0;plan.days.forEach((d,i)=>{const a=d.exercises.every((_,j)=>done[i+'-'+j]);if(a){days++;streak++;}d.exercises.forEach((ex,j)=>{if(done[i+'-'+j])sets+=ex.sets;});});document.getElementById('statsGrid').innerHTML=`<div class="stat-card" style="background:rgba(79,110,247,0.07);border:1.5px solid rgba(79,110,247,0.18)"><div class="stat-lbl" style="color:var(--accent)">Sets Done</div><div class="stat-val" style="color:var(--accent)">${sets}</div><div class="stat-sub" style="color:var(--accent)">${mlbl(viewMonth)}</div></div><div class="stat-card" style="background:rgba(16,185,129,0.07);border:1.5px solid rgba(16,185,129,0.18)"><div class="stat-lbl" style="color:#3B6D11">Days Done</div><div class="stat-val" style="color:#3B6D11">${days}/${plan.days.length}</div><div class="stat-sub" style="color:#3B6D11">completed</div></div><div class="stat-card" style="background:rgba(239,68,68,0.07);border:1.5px solid rgba(239,68,68,0.18)"><div class="stat-lbl" style="color:var(--red)">Protein</div><div class="stat-val" style="color:var(--red)">${profile.protein||calcCals().protein}g</div><div class="stat-sub" style="color:var(--red)">daily target</div></div><div class="stat-card" style="background:rgba(124,58,237,0.07);border:1.5px solid rgba(124,58,237,0.18)"><div class="stat-lbl" style="color:#534AB7">Streak</div><div class="stat-val" style="color:#534AB7">${streak}d</div><div class="stat-sub" style="color:#534AB7">this month</div></div>`;}
 function renderDayScroll(){
   const plan=curPlan(),done=gDone(viewMonth);
   const c=document.getElementById('dayScroll');
@@ -913,65 +845,8 @@ function openEditEx(di,j){ensureCustom();const ex=customDays[di].exercises[j];ed
 function saveEx(){const name=document.getElementById('emN').value.trim();if(!name){toast('Please enter exercise name','err');return;}const ex={name,sets:parseInt(document.getElementById('emS').value)||3,reps:document.getElementById('emR').value||'10-12',load:document.getElementById('emL').value||'Moderate',tip:document.getElementById('emT').value||'Focus on form'};ensureCustom();const di=parseInt(document.getElementById('exModal').dataset.day);if(editExKey){const[d,j]=editExKey.split('-').map(Number);customDays[d].exercises[j]=ex;toast('Exercise updated ✓');}else{customDays[di].exercises.push(ex);toast('Exercise added ✓');}closeExModal();sched();renderDayPanel();updateStats();}
 function deleteEx(di,j){if(!confirm('Remove this exercise?'))return;ensureCustom();customDays[di].exercises.splice(j,1);sched();renderDayPanel();updateStats();toast('Removed');}
 function closeExModal(){document.getElementById('exModal').classList.remove('show');}
-function renderProgress(){
-  const plan=curPlan(),done=gDone(viewMonth),wts=gWts(viewMonth);
-  const BAR=['#378ADD','#1D9E75','#BA7517','#7F77DD','#D85A30','#D4537E','#0F6E56','#993C1D'];
-  const dim=daysInMonth(viewMonth);
-  // Per plan-day: count completed exercises across all dates in month
-  const dayCounts=new Array(plan.days.length).fill(0);
-  const dayTotals=new Array(plan.days.length).fill(0);
-  const wlogMap={}; // planDayIdx -> html entries
-  for(let i=0;i<dim;i++){
-    const dateKey=dayDateKey(viewMonth,i);
-    if(isSunday(dateKey)) continue;
-    const planDayIdx=getWorkoutDayIdx(dateKey);
-    const d=plan.days[planDayIdx];
-    d.exercises.forEach((ex,j)=>{
-      dayTotals[planDayIdx]++;
-      if(done[dateKey+'-'+j]) dayCounts[planDayIdx]++;
-      const v=wts['w-'+dateKey+'-'+j];
-      if(v){
-        if(!wlogMap[planDayIdx]) wlogMap[planDayIdx]={label:d.label,sc:d.sc,entries:[]};
-        wlogMap[planDayIdx].entries.push(`<div class="wlog-r"><span style="color:var(--text3)">${ex.name}</span><span style="font-weight:700;color:var(--text)">${v} kg</span></div>`);
-      }
-    });
-  }
-  let bars='';
-  plan.days.forEach((d,i)=>{
-    const cnt=dayCounts[i],tot=Math.max(dayTotals[i],1);
-    const h=Math.round((cnt/tot)*88)+4;
-    bars+=`<div class="bar-wrap"><div class="bar-v" style="color:${BAR[i%BAR.length]}">${cnt}</div><div class="bar-c" style="height:${h}px;background:${BAR[i%BAR.length]}"></div><div class="bar-l">${d.label.split('\n')[0].slice(0,4)}</div></div>`;
-  });
-  let wlog='';
-  Object.entries(wlogMap).forEach(([idx,w])=>{
-    wlog+=`<div class="wlog-c"><div class="wlog-t" style="color:${w.sc}">${w.label.replace('\n',' ')}</div>${w.entries.join('')}</div>`;
-  });
-  const c=calcCals();
-  document.getElementById('vProgress').innerHTML=`<div class="pv"><div class="sec-t">Volume — ${mlbl(viewMonth)}</div><div class="chart-c"><div class="bar-chart">${bars}</div></div>${profile.weight?`<div class="sec-t">Daily Nutrition Targets</div><div class="chart-c"><div class="cal-grid"><div><div class="cal-val" style="color:var(--accent)">${c.kcal}</div><div class="cal-lbl">Calories</div></div><div><div class="cal-val" style="color:var(--red)">${c.protein}g</div><div class="cal-lbl">Protein</div></div><div><div class="cal-val" style="color:#FF9500">${c.carbs}g</div><div class="cal-lbl">Carbs</div></div><div><div class="cal-val" style="color:#1D9E75">${c.fat}g</div><div class="cal-lbl">Fat</div></div></div></div>`:''}<div class="sec-t">Weight Log</div>${wlog||'<div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">No weights logged this month.</div>'}</div>`;
-}
-function renderHistory(){
-  const months=Object.keys(monthData).sort().reverse();
-  const plan=curPlan();
-  let html='<div class="hv"><div class="sec-t">Monthly History</div>';
-  if(!months.length)html+='<div style="font-size:13px;color:var(--text3);text-align:center;padding:28px">No history yet. Keep training!</div>';
-  months.forEach(m=>{
-    const done=gDone(m);
-    const dim=daysInMonth(m);
-    let sets=0,completedDays=0,totalWorkoutDays=0;
-    for(let i=0;i<dim;i++){
-      const dateKey=dayDateKey(m,i);
-      if(isSunday(dateKey)) continue;
-      totalWorkoutDays++;
-      const planDayIdx=getWorkoutDayIdx(dateKey);
-      const d=plan.days[planDayIdx];
-      const allDone=d.exercises.every((_,j)=>done[dateKey+'-'+j]);
-      if(allDone) completedDays++;
-      d.exercises.forEach((ex,j)=>{if(done[dateKey+'-'+j])sets+=ex.sets;});
-    }
-    html+=`<div class="hist-card"><div class="hist-month">${mlbl(m)}</div><div class="hist-stats"><div class="hist-stat">Days: <span>${completedDays}/${totalWorkoutDays}</span></div><div class="hist-stat">Sets: <span>${sets}</span></div></div></div>`;
-  });
-  document.getElementById('vHistory').innerHTML=html+'</div>';
-}
+function renderProgress(){const plan=curPlan(),done=gDone(viewMonth),wts=gWts(viewMonth);const BAR=['#378ADD','#1D9E75','#BA7517','#7F77DD','#D85A30','#D4537E','#0F6E56','#993C1D'];let bars='';plan.days.forEach((d,i)=>{const cnt=d.exercises.filter((_,j)=>done[i+'-'+j]).length,h=Math.round((cnt/Math.max(d.exercises.length,1))*88)+4;bars+=`<div class="bar-wrap"><div class="bar-v" style="color:${BAR[i%BAR.length]}">${cnt}</div><div class="bar-c" style="height:${h}px;background:${BAR[i%BAR.length]}"></div><div class="bar-l">D${i+1}</div></div>`;});let wlog='';plan.days.forEach((d,i)=>{const e=d.exercises.map((ex,j)=>{const v=wts['w-'+i+'-'+j];return v?`<div class="wlog-r"><span style="color:var(--text3)">${ex.name}</span><span style="font-weight:700;color:var(--text)">${v} kg</span></div>`:''}).join('');if(e)wlog+=`<div class="wlog-c"><div class="wlog-t" style="color:${d.sc}">Day ${i+1} — ${d.label.replace('\n',' ')}</div>${e}</div>`;});const c=calcCals();document.getElementById('vProgress').innerHTML=`<div class="pv"><div class="sec-t">Volume — ${mlbl(viewMonth)}</div><div class="chart-c"><div class="bar-chart">${bars}</div></div>${profile.weight?`<div class="sec-t">Daily Nutrition Targets</div><div class="chart-c"><div class="cal-grid"><div><div class="cal-val" style="color:var(--accent)">${c.kcal}</div><div class="cal-lbl">Calories</div></div><div><div class="cal-val" style="color:var(--red)">${c.protein}g</div><div class="cal-lbl">Protein</div></div><div><div class="cal-val" style="color:#FF9500">${c.carbs}g</div><div class="cal-lbl">Carbs</div></div><div><div class="cal-val" style="color:#1D9E75">${c.fat}g</div><div class="cal-lbl">Fat</div></div></div></div>`:''}<div class="sec-t">Weight Log</div>${wlog||'<div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">No weights logged this month.</div>'}</div>`;}
+function renderHistory(){const months=Object.keys(monthData).sort().reverse();const plan=curPlan();let html='<div class="hv"><div class="sec-t">Monthly History</div>';if(!months.length)html+='<div style="font-size:13px;color:var(--text3);text-align:center;padding:28px">No history yet. Keep training!</div>';months.forEach(m=>{const done=gDone(m);let sets=0,days=0;plan.days.forEach((d,i)=>{const a=d.exercises.every((_,j)=>done[i+'-'+j]);if(a)days++;d.exercises.forEach((ex,j)=>{if(done[i+'-'+j])sets+=ex.sets;});});html+=`<div class="hist-card"><div class="hist-month">${mlbl(m)}</div><div class="hist-stats"><div class="hist-stat">Days: <span>${days}/${plan.days.length}</span></div><div class="hist-stat">Sets: <span>${sets}</span></div></div></div>`;});document.getElementById('vHistory').innerHTML=html+'</div>';}
 function renderProfile(){const plan=curPlan();const lc={'beginner':'#3B6D11','intermediate':'#FF9500','advanced':'#e05555'}[profile.level]||'#FF9500';const planRows=PLANS_META.map(p=>`<div class="p-row" onclick="changePlan('${p.id}')" style="cursor:pointer"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:18px">${p.icon}</span><div><div class="p-lbl">${p.name}</div><div style="font-size:10px;color:var(--text3)">${p.sub}</div></div></div>${profile.planId===p.id?'<span style="color:var(--accent);font-weight:700;font-size:13px">✓</span>':'<span style="color:var(--text3);font-size:12px">→</span>'}</div>`).join('');const lvlRows=['beginner','intermediate','advanced'].map(l=>`<div class="p-row" onclick="changeLevel('${l}')" style="cursor:pointer"><span class="p-lbl">${{beginner:'🟢 Beginner',intermediate:'🟡 Intermediate',advanced:'🔴 Advanced'}[l]}</span>${profile.level===l?'<span style="color:var(--accent);font-weight:700">✓ Active</span>':'<span style="color:var(--text3)">→</span>'}</div>`).join('');document.getElementById('vProfile').innerHTML=`<div class="prv"><div class="sec-t">My Profile</div><div class="p-card"><div class="p-card-t">Personal Info</div><div class="p-row"><span class="p-lbl">Name</span><span class="p-val">${profile.name||'—'}</span></div><div class="p-row"><span class="p-lbl">Weight</span><span class="p-val">${profile.weight?profile.weight+' kg':'—'}</span></div><div class="p-row"><span class="p-lbl">Height</span><span class="p-val">${profile.height?profile.height+' cm':'—'}</span></div><div class="p-row"><span class="p-lbl">Age</span><span class="p-val">${profile.age||'—'}</span></div><div class="p-row"><span class="p-lbl">Level</span><span class="lvl-badge" style="background:${lc}22;color:${lc}">${profile.level}</span></div><div class="p-row"><span class="p-lbl">Protein</span><span class="p-val">${profile.protein||calcCals().protein}g/day</span></div><div style="margin-top:12px"><button onclick="openPM()" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid rgba(79,110,247,0.2);background:rgba(79,110,247,0.05);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✏️ Edit Profile</button></div></div><div class="p-card"><div class="p-card-t">Current Plan</div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">${plan.icon||'🏋️'} ${plan.name}</div>${plan.phase?`<div style="background:rgba(24,95,165,.1);border:1px solid rgba(24,95,165,.2);border-radius:10px;padding:10px 12px;margin:8px 0"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase">Phase ${plan.phase.num} of ${plan.phase.total}</div><div style="font-size:13px;color:var(--text);font-weight:600;margin-top:2px">${plan.phase.focus}</div></div>`:''}<div style="font-size:12px;color:var(--text3)">${plan.days.length} days per week</div></div><div class="p-card"><div class="p-card-t">Change Plan</div>${planRows}</div><div class="p-card"><div class="p-card-t">Change Level</div>${lvlRows}</div><button class="danger-btn" onclick="resetMonth()">🗑 Reset ${mlbl(viewMonth)} Data</button><button class="danger-btn" style="color:var(--text3);border-color:var(--border2);background:var(--glass2)" onclick="resetProg()">🔄 Reset Default Program</button><button class="out-btn" onclick="doLogout()">Log Out</button></div>`;}
 function changePlan(id){profile.planId=id;customDays=null;sched();initApp();renderProfile();toast('Plan changed!');}
 function changeLevel(l){profile.level=l;sched();updateHero();renderProfile();toast('Level: '+l);}
@@ -1014,18 +889,15 @@ function getYesterdayKey(){ const d=new Date(); d.setDate(d.getDate()-1); return
 
 function updateStreakData(){
   const plan=curPlan();
-  const today=todayIST();
-  if(isSunday(today)) return; // Sunday = rest, no streak
-  const todayMonth=today.slice(0,7);
-  const todayDone=gDone(todayMonth);
-  const planDayIdx=getWorkoutDayIdx(today);
-  const todayPlan=plan.days[planDayIdx];
-  const hasAnyDone=todayPlan.exercises.some((_,j)=>todayDone[today+'-'+j]);
+  const done=gDone(viewMonth||mk());
+  const hasAnyDone=Object.values(done).some(v=>v);
   if(!hasAnyDone) return;
+  const today=todayIST();
   if(!profile.streakDates) profile.streakDates=[];
   if(!profile.streakDates.includes(today)){
     profile.streakDates.push(today);
     profile.streakDates.sort();
+    // Keep last 365 days only
     if(profile.streakDates.length>365) profile.streakDates=profile.streakDates.slice(-365);
     recalcStreak();
     sched();
@@ -1035,40 +907,28 @@ function updateStreakData(){
 function recalcStreak(){
   const dates=profile.streakDates||[];
   if(!dates.length){profile.currentStreak=0;return;}
+  // Current streak
+  let streak=0;
   const today=todayIST();
   const yesterday=yesterdayIST();
   const last=dates[dates.length-1];
-
-  // Helper: get previous expected workout date (skip Sundays going backward)
-  function prevWorkoutDate(dateStr){
-    const[y,m,d]=dateStr.split('-').map(Number);
-    let dt=new Date(y,m-1,d);
-    dt.setDate(dt.getDate()-1);
-    // Skip Sunday
-    if(dt.getDay()===0) dt.setDate(dt.getDate()-1);
-    return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
-  }
-
-  // Current streak — going backward from today/yesterday, skipping Sundays
-  let streak=0;
-  if(last!==today&&last!==yesterday){
-    profile.currentStreak=0;
-  } else {
-    let check=last;
+  if(last!==today&&last!==yesterday){profile.currentStreak=0;}
+  else{
+    let check=last===today?today:yesterday;
+    const d=new Date(check);
     for(let i=dates.length-1;i>=0;i--){
-      if(dates[i]===check){
-        streak++;
-        check=prevWorkoutDate(check);
-      } else break;
+      const expected=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if(dates[i]===expected){streak++;d.setDate(d.getDate()-1);}
+      else break;
     }
     profile.currentStreak=streak;
   }
-
-  // Best streak — consecutive workout days (Sundays auto-skipped)
+  // Best streak
   let best=0,cur=1;
   for(let i=1;i<dates.length;i++){
-    const expected=prevWorkoutDate(dates[i]); // what day should come before dates[i]
-    if(dates[i-1]===expected){cur++;if(cur>best)best=cur;}
+    const a=new Date(dates[i-1]),b=new Date(dates[i]);
+    const diff=(b-a)/(1000*60*60*24);
+    if(diff===1){cur++;if(cur>best)best=cur;}
     else cur=1;
   }
   if(dates.length===1)best=1;
@@ -1392,22 +1252,7 @@ function renderAICoach(){
   </div>`;
 }
 
-window.onload=async()=>{
-  switchTab('login');
-  const sv=localStorage.getItem('gym_s');
-  if(sv){
-    try{
-      session=JSON.parse(sv);
-      await loadData();
-      await loadAdminExercises(session.token);
-      if(!profile.level){buildOb();showScr('sOnboard');}
-      else{initApp();showScr('sMain');}
-    }catch(_){
-      localStorage.removeItem('gym_s');
-      session=null;
-    }
-  }
-};
+window.onload=async()=>{switchTab('signup');const sv=localStorage.getItem('gym_s');if(sv){try{session=JSON.parse(sv);await loadData();await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');}}catch(_){localStorage.removeItem('gym_s');}}};
 </script>
 </body>
 </html>
