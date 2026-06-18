@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-<title>GymPro — Train Smart</title>
+<title>GymDot — Train Smart</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -495,7 +495,7 @@ body>*{position:relative;z-index:1;}
 <div class="auth-wrap"><div class="auth-box">
   <div class="auth-logo">
     <span class="auth-icon">🏋️</span>
-    <div class="auth-badge">GymPro</div>
+    <div class="auth-badge">GymDot</div>
     <div class="auth-title">Train Smart</div>
     <div class="auth-sub">Science-based workout tracking</div>
   </div>
@@ -552,7 +552,7 @@ body>*{position:relative;z-index:1;}
   <div class="hero"><div class="hero-grd"></div>
     <div class="hero-inner">
       <div>
-        <div class="hero-badge" id="hBadge">🏋️ GymPro</div>
+        <div class="hero-badge" id="hBadge">🏋️ GymDot</div>
         <div class="hero-title" id="hTitle">Your Program</div>
         <div class="hero-sub" id="hSub">☁️ Loading...</div>
       </div>
@@ -710,7 +710,7 @@ function buildOb(){
 function selLvl(l){obLevel=l;document.querySelectorAll('.level-card').forEach(el=>el.classList.remove('sel'));document.getElementById('lc_'+l).classList.add('sel');document.getElementById('obN1').disabled=false;}
 function selPlan(p){obPlan=p;document.querySelectorAll('.plan-card').forEach(el=>el.classList.remove('sel'));document.getElementById('pc_'+p).classList.add('sel');document.getElementById('obN2').disabled=false;}
 function obGo(s){document.querySelectorAll('.ob-step').forEach(el=>el.classList.remove('active'));document.getElementById('obs'+s).classList.add('active');[1,2,3].forEach(i=>document.getElementById('od'+i).classList.toggle('done',i<=s));}
-async function finishOnboard(){profile.level=obLevel||'intermediate';profile.planId=obPlan||'ppl';profile.name=document.getElementById('aName').value.trim()||session.email.split('@')[0];profile.weight=document.getElementById('obW').value;profile.age=document.getElementById('obA').value;profile.height=document.getElementById('obH').value;profile.gender=document.getElementById('obG').value;if(!profile.protein){const c=calcCals();profile.protein=String(c.protein);}await fbS('profile',profile);await loadAdminExercises(session.token);initApp();showScr('sMain');toast('Welcome to GymPro! 🎉');}
+async function finishOnboard(){profile.level=obLevel||'intermediate';profile.planId=obPlan||'ppl';profile.name=document.getElementById('aName').value.trim()||session.email.split('@')[0];profile.weight=document.getElementById('obW').value;profile.age=document.getElementById('obA').value;profile.height=document.getElementById('obH').value;profile.gender=document.getElementById('obG').value;if(!profile.protein){const c=calcCals();profile.protein=String(c.protein);}await fbS('profile',profile);await loadAdminExercises(session.token);initApp();showScr('sMain');toast('Welcome to GymDot! 🎉');}
 function initApp(){if(!viewMonth)viewMonth=mk();updateHero();updateStats();updateCalCard();renderTopNav();renderDayScroll();renderDayPanel();document.getElementById('mLabel').textContent=mlbl(viewMonth);}
 function updateHero(){const plan=curPlan();document.getElementById('hBadge').textContent='🏋️ '+plan.name;document.getElementById('hTitle').textContent=plan.days.length+'-Day Program';document.getElementById('hSub').textContent='☁️ Hi, '+(profile.name||'there');}
 function updateCalCard(){if(!profile.weight){document.getElementById('calCard').style.display='none';return;}const c=calcCals();document.getElementById('calCard').style.display='block';document.getElementById('calGrid').innerHTML=`<div><div class="cal-val" style="color:var(--accent)">${c.kcal}</div><div class="cal-lbl">Calories</div></div><div><div class="cal-val" style="color:var(--red)">${c.protein}g</div><div class="cal-lbl">Protein</div></div><div><div class="cal-val" style="color:#FF9500">${c.carbs}g</div><div class="cal-lbl">Carbs</div></div><div><div class="cal-val" style="color:#1D9E75">${c.fat}g</div><div class="cal-lbl">Fat</div></div>`;}
