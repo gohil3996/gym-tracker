@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Delete Account — GymDot</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#f0f4ff 0%,#fafafa 50%,#f0fdf4 100%);
+    min-height:100vh;color:#1a1a2e;
+  }
+  header{
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(0,0,0,0.07);
+    padding:16px 24px;
+    display:flex;align-items:center;gap:12px;
+    position:sticky;top:0;z-index:10;
+  }
+  .logo{
+    width:40px;height:40px;border-radius:12px;
+    background:linear-gradient(135deg,#4f46e5,#06b6d4);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;box-shadow:0 2px 8px rgba(79,70,229,0.3);
+  }
+  .app-name{font-size:20px;font-weight:700;color:#1a1a2e;letter-spacing:-0.3px}
+  .app-name span{color:#4f46e5}
+  .container{max-width:680px;margin:0 auto;padding:40px 20px 80px}
+
+  .hero{
+    background:rgba(255,255,255,0.75);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.9);
+    border-radius:24px;padding:36px 32px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.06);
+    margin-bottom:20px;text-align:center;
+  }
+  .hero-icon{font-size:48px;margin-bottom:16px;display:block}
+  .hero h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;color:#1a1a2e}
+  .hero p{font-size:15px;color:#555;line-height:1.6;max-width:480px;margin:0 auto}
+
+  .card{
+    background:rgba(255,255,255,0.75);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.9);
+    border-radius:20px;padding:28px 28px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom:16px;
+  }
+  .card h2{font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .card h2 .tag{
+    font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;
+    background:#fef3c7;color:#92400e;letter-spacing:0.3px;
+  }
+
+  /* Steps */
+  .steps{display:flex;flex-direction:column;gap:14px}
+  .step{display:flex;gap:14px;align-items:flex-start}
+  .step-num{
+    width:30px;height:30px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,#4f46e5,#06b6d4);
+    color:#fff;font-size:13px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(79,70,229,0.3);
+  }
+  .step-body{padding-top:4px}
+  .step-body strong{font-size:14px;font-weight:600;color:#1a1a2e;display:block;margin-bottom:3px}
+  .step-body p{font-size:13px;color:#666;line-height:1.5}
+  .step-body code{
+    background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;
+    padding:2px 7px;font-size:12px;color:#4f46e5;font-family:monospace;
+  }
+
+  /* Data list */
+  .data-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:480px){.data-grid{grid-template-columns:1fr}}
+  .data-item{
+    display:flex;align-items:center;gap:10px;
+    background:#f8faff;border:1px solid #e8edff;
+    border-radius:12px;padding:12px 14px;
+  }
+  .data-item .ico{font-size:20px;flex-shrink:0}
+  .data-item .info{font-size:13px}
+  .data-item .info strong{display:block;color:#1a1a2e;font-weight:600;margin-bottom:1px}
+  .data-item .info span{color:#888}
+
+  /* Email button */
+  .email-btn{
+    display:block;width:100%;padding:16px;text-align:center;
+    background:linear-gradient(135deg,#4f46e5,#06b6d4);
+    color:#fff;border-radius:14px;font-size:15px;font-weight:600;
+    text-decoration:none;letter-spacing:0.2px;
+    box-shadow:0 4px 16px rgba(79,70,229,0.35);
+    transition:transform 0.15s,box-shadow 0.15s;
+    margin-top:8px;
+  }
+  .email-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,70,229,0.45)}
+
+  /* Timeline badge */
+  .timeline{
+    display:flex;gap:10px;align-items:center;
+    background:linear-gradient(135deg,#ecfdf5,#f0fdf4);
+    border:1px solid #bbf7d0;border-radius:14px;padding:16px 18px;
+    margin-top:16px;
+  }
+  .timeline .ico{font-size:24px;flex-shrink:0}
+  .timeline .text strong{display:block;font-size:14px;font-weight:700;color:#065f46}
+  .timeline .text p{font-size:13px;color:#047857;margin-top:2px}
+
+  /* Warning */
+  .warning{
+    display:flex;gap:10px;align-items:flex-start;
+    background:#fff7ed;border:1px solid #fed7aa;
+    border-radius:14px;padding:16px 18px;margin-top:12px;
+  }
+  .warning .ico{font-size:20px;flex-shrink:0;margin-top:1px}
+  .warning p{font-size:13px;color:#9a3412;line-height:1.5}
+
+  /* Footer */
+  footer{text-align:center;padding-top:32px;padding-bottom:20px}
+  footer p{font-size:13px;color:#aaa}
+  footer a{color:#4f46e5;text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🏋️</div>
+  <div class="app-name">Gym<span>Dot</span></div>
+</header>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <span class="hero-icon">🗑️</span>
+    <h1>Request Account Deletion</h1>
+    <p>You have the right to delete your GymDot account and all associated personal data at any time. Here's how to do it.</p>
+  </div>
+
+  <!-- How to request -->
+  <div class="card">
+    <h2>How to Request Deletion</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Option A — Via Email (Recommended)</strong>
+          <p>Send an email to <code>gymdot.help@gmail.com</code> with the subject line <code>Delete My Account</code> and include your registered email address.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Option B — From Inside the App</strong>
+          <p>Open GymDot → Go to <code>Profile</code> tab → Scroll to bottom → Tap <code>Log Out</code> and contact support via email to complete the deletion.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>We will confirm and process within 30 days</strong>
+          <p>You will receive an email confirmation once your account and all data has been permanently deleted.</p>
+        </div>
+      </div>
+    </div>
+
+    <a class="email-btn" href="mailto:gymdot.help@gmail.com?subject=Delete%20My%20Account&body=Hi%2C%20I%20would%20like%20to%20delete%20my%20GymDot%20account.%0A%0ARegistered%20Email%3A%20%5BYour%20Email%5D%0A%0APlease%20delete%20all%20my%20data%20permanently.">
+      📧 Send Deletion Request Email
+    </a>
+
+    <div class="timeline">
+      <div class="ico">⏱️</div>
+      <div class="text">
+        <strong>Processed within 30 days</strong>
+        <p>After receiving your request, all data will be permanently deleted within 30 days.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- What gets deleted -->
+  <div class="card">
+    <h2>Data That Will Be Deleted <span class="tag">ALL DATA REMOVED</span></h2>
+    <div class="data-grid">
+      <div class="data-item">
+        <div class="ico">👤</div>
+        <div class="info">
+          <strong>Account & Profile</strong>
+          <span>Name, email, fitness goals</span>
+        </div>
+      </div>
+      <div class="data-item">
+        <div class="ico">🏋️</div>
+        <div class="info">
+          <strong>Workout Logs</strong>
+          <span>All exercise history and records</span>
+        </div>
+      </div>
+      <div class="data-item">
+        <div class="ico">📈</div>
+        <div class="info">
+          <strong>Progress Data</strong>
+          <span>Weight logs and progress charts</span>
+        </div>
+      </div>
+      <div class="data-item">
+        <div class="ico">🥗</div>
+        <div class="info">
+          <strong>Diet & Nutrition</strong>
+          <span>Meal plans and calorie entries</span>
+        </div>
+      </div>
+      <div class="data-item">
+        <div class="ico">🔐</div>
+        <div class="info">
+          <strong>Authentication</strong>
+          <span>Firebase login credentials</span>
+        </div>
+      </div>
+      <div class="data-item">
+        <div class="ico">⚙️</div>
+        <div class="info">
+          <strong>Preferences</strong>
+          <span>App settings and configurations</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="warning">
+      <div class="ico">⚠️</div>
+      <p><strong>This action is permanent and cannot be undone.</strong> Once deleted, your workout history, progress, and all personal data cannot be recovered. Please export any important data before requesting deletion.</p>
+    </div>
+  </div>
+
+  <!-- What we retain -->
+  <div class="card">
+    <h2>Data Retention Policy</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-body">
+          <strong>No data retained after deletion</strong>
+          <p>GymDot does not retain any personal user data after an account deletion request is fulfilled. All Firebase Authentication records and Firestore data are permanently erased.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-body">
+          <strong>Anonymous analytics only</strong>
+          <p>We may retain anonymized, non-personal crash reports for app improvement. These contain no identifying information and cannot be linked back to your account.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>GymDot — Train Smart &nbsp;·&nbsp; <a href="mailto:gymdot.help@gmail.com">gymdot.help@gmail.com</a></p>
+  <p style="margin-top:6px">© 2026 GymDot. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
