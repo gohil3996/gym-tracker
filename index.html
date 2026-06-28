@@ -8,29 +8,83 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
+  /* Brand colors */
   --accent:#4f6ef7;
   --accent2:#7c3aed;
   --accent3:#06b6d4;
   --green:#10b981;
   --red:#ef4444;
   --amber:#f59e0b;
+  --pink:#ec4899;
 
-  /* Light premium palette */
+  /* ── LIGHT MODE (default) ── */
   --bg:linear-gradient(135deg,#e8eeff 0%,#f0e8ff 30%,#e8f4ff 60%,#fff0f8 100%);
+  --bg-solid:#eef0ff;
   --text:#0f172a;
   --text2:#475569;
   --text3:#94a3b8;
-  --bg2:rgba(255,255,255,0.45);
-  --border:rgba(148,163,184,0.2);
-  --border2:rgba(148,163,184,0.35);
-  --shadow:0 2px 16px rgba(79,110,247,0.08),0 1px 3px rgba(0,0,0,0.06);
+  --border:rgba(148,163,184,0.18);
+  --border2:rgba(148,163,184,0.32);
+  --shadow:0 2px 16px rgba(79,110,247,0.08),0 1px 3px rgba(0,0,0,0.05);
   --shadow2:0 4px 24px rgba(79,110,247,0.12),0 1px 4px rgba(0,0,0,0.06);
   --shadow3:0 8px 40px rgba(79,110,247,0.18),0 2px 8px rgba(0,0,0,0.08);
-  --glow:0 0 0 3px rgba(79,110,247,0.15);
-  --blur:blur(20px) saturate(180%);
-  --glass:rgba(255,255,255,0.72);
+  /* 3D glass - light */
+  --glass:rgba(255,255,255,0.75);
   --glass2:rgba(255,255,255,0.55);
-  --glass3:rgba(255,255,255,0.35);
+  --glass3:rgba(255,255,255,0.32);
+  --glass-border:rgba(255,255,255,0.95);
+  --glass-border2:rgba(255,255,255,0.6);
+  --glass-shine:rgba(255,255,255,0.9);
+  --glass-depth:rgba(100,120,200,0.06);
+  --blur:blur(20px) saturate(180%);
+  --glow:0 0 0 3px rgba(79,110,247,0.15);
+  /* 3D effect layers */
+  --card-3d:
+    0 1px 0 rgba(255,255,255,0.95) inset,
+    0 -1px 0 rgba(100,120,200,0.08) inset,
+    0 4px 24px rgba(79,110,247,0.1),
+    0 1px 4px rgba(0,0,0,0.05);
+  --btn-3d:
+    0 1px 0 rgba(255,255,255,0.4) inset,
+    0 -2px 0 rgba(0,0,0,0.15) inset,
+    0 4px 16px rgba(79,110,247,0.35),
+    0 1px 3px rgba(0,0,0,0.1);
+  --theme-icon:'🌙';
+}
+
+/* ── DARK MODE ── */
+[data-theme="dark"]{
+  --bg:linear-gradient(135deg,#0a0e1a 0%,#0f0818 30%,#080e1c 60%,#0a0812 100%);
+  --bg-solid:#080c18;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --text3:#475569;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.1);
+  --shadow:0 2px 16px rgba(0,0,0,0.4),0 1px 3px rgba(0,0,0,0.3);
+  --shadow2:0 4px 24px rgba(0,0,0,0.5),0 1px 4px rgba(0,0,0,0.3);
+  --shadow3:0 8px 40px rgba(0,0,0,0.6),0 2px 8px rgba(0,0,0,0.4);
+  /* 3D glass - dark */
+  --glass:rgba(255,255,255,0.06);
+  --glass2:rgba(255,255,255,0.04);
+  --glass3:rgba(255,255,255,0.02);
+  --glass-border:rgba(255,255,255,0.12);
+  --glass-border2:rgba(255,255,255,0.06);
+  --glass-shine:rgba(255,255,255,0.08);
+  --glass-depth:rgba(0,0,0,0.3);
+  --blur:blur(20px) saturate(150%);
+  --glow:0 0 0 3px rgba(79,110,247,0.3);
+  --card-3d:
+    0 1px 0 rgba(255,255,255,0.08) inset,
+    0 -1px 0 rgba(0,0,0,0.4) inset,
+    0 4px 24px rgba(0,0,0,0.4),
+    0 1px 4px rgba(0,0,0,0.3);
+  --btn-3d:
+    0 1px 0 rgba(255,255,255,0.2) inset,
+    0 -2px 0 rgba(0,0,0,0.3) inset,
+    0 4px 16px rgba(79,110,247,0.4),
+    0 1px 3px rgba(0,0,0,0.3);
+  --theme-icon:'☀️';
 }
 body{
   font-family:'Inter',sans-serif;
@@ -38,6 +92,7 @@ body{
   background-attachment:fixed;
   color:var(--text);
   min-height:100vh;
+  transition:background .4s,color .3s;
 }
 /* Animated bg mesh */
 body::before{
@@ -50,6 +105,14 @@ body::before{
     radial-gradient(ellipse 400px 400px at 80% 60%,rgba(236,72,153,0.06) 0%,transparent 70%);
   pointer-events:none;
   z-index:0;
+  transition:opacity .4s;
+}
+[data-theme="dark"] body::before{
+  background:
+    radial-gradient(ellipse 600px 400px at 10% 10%,rgba(79,110,247,0.2) 0%,transparent 70%),
+    radial-gradient(ellipse 500px 500px at 90% 5%,rgba(124,58,237,0.18) 0%,transparent 70%),
+    radial-gradient(ellipse 700px 400px at 50% 100%,rgba(6,182,212,0.12) 0%,transparent 70%),
+    radial-gradient(ellipse 400px 400px at 80% 60%,rgba(236,72,153,0.1) 0%,transparent 70%);
 }
 body>*{position:relative;z-index:1;}
 .screen{display:none}.screen.active{display:block}
@@ -486,6 +549,91 @@ body>*{position:relative;z-index:1;}
 .diet-meal-title{font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
 .diet-meal-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(148,163,184,0.08);font-size:12px}
 .diet-meal-item:last-child{border-bottom:none}
+
+/* ── DARK MODE OVERRIDES ── */
+body,[data-theme]{transition:background .4s,color .3s,border-color .3s,box-shadow .3s;}
+
+/* 3D Glass cards - enhanced */
+.stat-card,.cal-card,.ex-card,.day-hdr,.prog-wrap,.chart-c,.wlog-c,.hist-card,.p-card,.sheet,.modal{
+  box-shadow:var(--card-3d);
+  border-color:var(--glass-border);
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+.stat-card:hover,.ex-card:hover{
+  transform:translateY(-2px) scale(1.01);
+  box-shadow:var(--shadow3);
+}
+
+/* 3D Buttons */
+.primary-btn,.ob-btn,.close-sheet,.m-save,.sbtn{
+  box-shadow:var(--btn-3d);
+  position:relative;
+  overflow:hidden;
+}
+.primary-btn::before,.ob-btn::before,.close-sheet::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(rgba(255,255,255,0.2),transparent);
+  pointer-events:none;border-radius:inherit;
+}
+
+/* Dark mode specific tweaks */
+[data-theme="dark"] .stat-card{background:var(--glass);}
+[data-theme="dark"] .ex-card{background:var(--glass);}
+[data-theme="dark"] .bottom-nav{background:rgba(8,12,24,0.85);}
+[data-theme="dark"] .day-chip{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);}
+[data-theme="dark"] .day-chip.active{background:rgba(79,110,247,0.2);}
+[data-theme="dark"] .tnav-btn{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.08);color:var(--text2);}
+[data-theme="dark"] .auth-box{background:rgba(255,255,255,0.05);}
+[data-theme="dark"] .inp,[data-theme="dark"] .mi,[data-theme="dark"] .m-inp{
+  background:rgba(255,255,255,0.06);
+  border-color:rgba(255,255,255,0.1);
+  color:var(--text);
+}
+[data-theme="dark"] .inp::placeholder,[data-theme="dark"] .mi::placeholder{color:var(--text3);}
+[data-theme="dark"] .sheet,[data-theme="dark"] .modal{background:rgba(10,14,26,0.95);}
+[data-theme="dark"] .tab-btn.active{background:rgba(79,110,247,0.25);}
+[data-theme="dark"] .level-card,[data-theme="dark"] .plan-card{background:rgba(255,255,255,0.04);}
+[data-theme="dark"] .marr{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1);}
+[data-theme="dark"] .ex-stats-row{border-top:1px solid rgba(255,255,255,0.06);}
+[data-theme="dark"] .ex-stat{border-right:1px solid rgba(255,255,255,0.06);}
+[data-theme="dark"] .prog-track{background:rgba(255,255,255,0.08);}
+[data-theme="dark"] .add-ex-btn{border-color:rgba(79,110,247,0.3);background:rgba(79,110,247,0.08);}
+[data-theme="dark"] .tbl th{border-bottom-color:rgba(255,255,255,0.08);}
+[data-theme="dark"] .tbl td{border-bottom-color:rgba(255,255,255,0.05);}
+
+/* Theme toggle button */
+.theme-toggle{
+  width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;
+  box-shadow:var(--card-3d);
+  transition:all .3s;
+  flex-shrink:0;
+}
+.theme-toggle:hover{transform:scale(1.1);box-shadow:var(--shadow3);}
+
+/* 3D day chip shine effect */
+.day-chip{position:relative;overflow:hidden;}
+.day-chip::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:40%;
+  background:linear-gradient(rgba(255,255,255,0.3),transparent);
+  pointer-events:none;border-radius:inherit;
+}
+[data-theme="dark"] .day-chip::before{
+  background:linear-gradient(rgba(255,255,255,0.06),transparent);
+}
+
+/* Smooth card glass shine */
+.stat-card{position:relative;overflow:hidden;}
+.stat-card::after{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:40%;
+  background:linear-gradient(var(--glass-shine),transparent);
+  pointer-events:none;border-radius:inherit;
+}
+
 </style>
 </head>
 <body>
@@ -556,7 +704,10 @@ body>*{position:relative;z-index:1;}
         <div class="hero-title" id="hTitle">Your Program</div>
         <div class="hero-sub" id="hSub">☁️ Loading...</div>
       </div>
-      <button class="avatar-btn" onclick="setNav('profile')">👤</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+        <button class="avatar-btn" onclick="setNav('profile')">👤</button>
+      </div>
     </div>
   </div>
   <div class="stats-grid" id="statsGrid"></div>
@@ -713,7 +864,22 @@ function selLvl(l){obLevel=l;document.querySelectorAll('.level-card').forEach(el
 function selPlan(p){obPlan=p;document.querySelectorAll('.plan-card').forEach(el=>el.classList.remove('sel'));document.getElementById('pc_'+p).classList.add('sel');document.getElementById('obN2').disabled=false;}
 function obGo(s){document.querySelectorAll('.ob-step').forEach(el=>el.classList.remove('active'));document.getElementById('obs'+s).classList.add('active');[1,2,3].forEach(i=>document.getElementById('od'+i).classList.toggle('done',i<=s));}
 async function finishOnboard(){profile.level=obLevel||'intermediate';profile.planId=obPlan||'ppl';profile.name=document.getElementById('aName').value.trim()||session.email.split('@')[0];profile.weight=document.getElementById('obW').value;profile.age=document.getElementById('obA').value;profile.height=document.getElementById('obH').value;profile.gender=document.getElementById('obG').value;if(!profile.protein){const c=calcCals();profile.protein=String(c.protein);}await fbS('profile',profile);await loadAdminExercises(session.token);initApp();showScr('sMain');toast('Welcome to GymDot! 🎉');}
-function initApp(){if(!viewMonth)viewMonth=mk();updateHero();updateStats();updateCalCard();renderTopNav();renderDayScroll();renderDayPanel();document.getElementById('mLabel').textContent=mlbl(viewMonth);}
+function toggleTheme(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const newTheme=isDark?'light':'dark';
+  document.documentElement.setAttribute('data-theme',newTheme);
+  localStorage.setItem('gymdot-theme',newTheme);
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+}
+function initTheme(){
+  const saved=localStorage.getItem('gymdot-theme');
+  const prefersDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const theme=saved||(prefersDark?'dark':'light');
+  document.documentElement.setAttribute('data-theme',theme);
+  const btn=document.getElementById('themeBtn');
+  if(btn)btn.textContent=theme==='dark'?'☀️':'🌙';
+}
+function initApp(){if(!viewMonth)viewMonth=mk();initTheme();updateHero();updateStats();updateCalCard();renderTopNav();renderDayScroll();renderDayPanel();document.getElementById('mLabel').textContent=mlbl(viewMonth);}
 function updateHero(){const plan=curPlan();document.getElementById('hBadge').textContent='🏋️ '+plan.name;document.getElementById('hTitle').textContent=plan.days.length+'-Day Program';document.getElementById('hSub').textContent='☁️ Hi, '+(profile.name||'there');}
 function updateCalCard(){if(!profile.weight){document.getElementById('calCard').style.display='none';return;}const c=calcCals();document.getElementById('calCard').style.display='block';document.getElementById('calGrid').innerHTML=`<div><div class="cal-val" style="color:var(--accent)">${c.kcal}</div><div class="cal-lbl">Calories</div></div><div><div class="cal-val" style="color:var(--red)">${c.protein}g</div><div class="cal-lbl">Protein</div></div><div><div class="cal-val" style="color:#FF9500">${c.carbs}g</div><div class="cal-lbl">Carbs</div></div><div><div class="cal-val" style="color:#1D9E75">${c.fat}g</div><div class="cal-lbl">Fat</div></div>`;}
 function changeMonth(dir){const[y,m]=viewMonth.split('-').map(Number);viewMonth=mk(new Date(y,m-1+dir,1));document.getElementById('mLabel').textContent=mlbl(viewMonth);updateStats();renderDayScroll();renderDayPanel();if(curNav==='progress')renderProgress();if(curNav==='history')renderHistory();}
@@ -1254,7 +1420,7 @@ function renderAICoach(){
   </div>`;
 }
 
-window.onload=async()=>{switchTab('signup');const sv=localStorage.getItem('gym_s');if(sv){try{session=JSON.parse(sv);await loadData();await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');}}catch(_){localStorage.removeItem('gym_s');}}};
+window.onload=async()=>{initTheme();switchTab('signup');const sv=localStorage.getItem('gym_s');if(sv){try{session=JSON.parse(sv);await loadData();await loadAdminExercises(session.token);if(!profile.level){buildOb();showScr('sOnboard');}else{initApp();showScr('sMain');}}catch(_){localStorage.removeItem('gym_s');}}};
 </script>
 </body>
 </html>
